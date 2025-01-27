@@ -24,7 +24,11 @@ public class ConnectionHandler implements Runnable {
         try {
             out = new PrintWriter(client.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-            System.out.println(in.readLine());
+            System.out.println(client.getPort() + " connected");
+            String message;
+            while ((message = in.readLine()) != null) {
+                System.out.println(client.getPort() + ": " + message);
+            }
         } catch (IOException e) {
             // TODO: handle
         }
