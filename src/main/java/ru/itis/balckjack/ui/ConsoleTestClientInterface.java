@@ -10,9 +10,6 @@ public class ConsoleTestClientInterface {
         new Thread(client).start();
 
         Scanner scanner = new Scanner(System.in);
-        while (true) {
-            String message = scanner.nextLine();
-            client.sendMessage(message);
-        }
+        client.sendMessage("aboba");
     }
 }

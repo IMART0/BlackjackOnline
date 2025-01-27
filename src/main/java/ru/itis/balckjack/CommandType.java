@@ -23,7 +23,7 @@ public enum CommandType {
     public int getId() {
         return id;
     }
-    public static CommandType fromId(int id) {
+    public static CommandType getById(int id) {
         for (CommandType value : CommandType.values()) {
             if (value.getId() == id) {
                 return value;
