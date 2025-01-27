@@ -1,34 +1,48 @@
 package ru.itis.balckjack;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
-public class BlackjackClient extends Thread {
+public class BlackjackClient implements Runnable {
 
     private final Logger logger = LogManager.getLogger(BlackjackClient.class);
     private PrintWriter out;
     private BufferedReader in;
+    private Socket client;
 
     @Override
     public void run() {
         try {
-            Socket client = new Socket("localhost", 12345);
-            System.out.println("From client: connected");
+            client = new Socket("localhost", 12345);
+            logger.info("Connected to server");
 
-            out = new PrintWriter(client.getOutputStream());
+            out = new PrintWriter(client.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
-            client.close();
+            new Thread(this::listenForMessages).start();
+
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            logger.error("Connection error: " + e.getMessage());
         }
     }
 
     public void sendMessage(String message) {
-        out.println(message);
+        if (out != null) {
+            out.println(message);
+        }
+    }
+
+    private void listenForMessages() {
+        try {
+            String message;
+            while ((message = in.readLine()) != null) {
+                System.out.println(message);
+            }
+        } catch (IOException e) {
+            logger.error("Error reading from server: " + e.getMessage());
+        }
     }
 }

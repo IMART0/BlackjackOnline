@@ -3,44 +3,53 @@ package ru.itis.balckjack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
 public class ConnectionHandler implements Runnable {
-    private final Logger logger = LogManager.getLogger(ConnectionHandler.class);
-    private final Socket client;
-    private BufferedReader in;
-    private PrintWriter out;
+    private static final Logger logger = LogManager.getLogger(ConnectionHandler.class);
 
-    public ConnectionHandler(Socket client) {
-        this.client = client;
+    private final Socket socket;
+    private final BlackjackServer server;
+    private PrintWriter out;
+    private BufferedReader in;
+
+    public ConnectionHandler(Socket socket, BlackjackServer server) {
+        this.socket = socket;
+        this.server = server;
     }
 
     @Override
     public void run() {
         try {
-            out = new PrintWriter(client.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-            System.out.println(client.getPort() + " connected");
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            out = new PrintWriter(socket.getOutputStream(), true);
+
             String message;
             while ((message = in.readLine()) != null) {
-                System.out.println(client.getPort() + ": " + message);
+                System.out.println(message);
             }
         } catch (IOException e) {
-            // TODO: handle
+            logger.error("Connection error: {}", e.getMessage());
+        } finally {
+            stop();
+        }
+    }
+
+    public void sendMessage(String message) {
+        if (out != null) {
+            out.println(message);
         }
     }
 
     public void stop() {
         try {
-            in.close();
-            out.close();
-            client.close();
+            if (in != null) in.close();
+            if (out != null) out.close();
+            if (socket != null) socket.close();
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            logger.error("Error while closing connection: {}", e.getMessage());
         }
+        server.removeConnection(this);
     }
 }

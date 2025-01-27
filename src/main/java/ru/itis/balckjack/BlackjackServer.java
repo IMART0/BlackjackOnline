@@ -31,18 +31,33 @@ public class BlackjackServer implements Runnable {
 
     @Override
     public void run() {
-        try (ExecutorService executor = Executors.newCachedThreadPool()) {
+        try {
+            ExecutorService executor = Executors.newCachedThreadPool();
             server = new ServerSocket(12345);
+            logger.info("Server started on port 12345...");
+
             while (!gameProcess.isGameFinished()) {
                 Socket client = server.accept();
-                ConnectionHandler connection = new ConnectionHandler(client);
+                logger.info("New client connected: " + client.getInetAddress());
+                ConnectionHandler connection = new ConnectionHandler(client, this);
                 connections.add(connection);
                 executor.execute(connection);
             }
             stop();
         } catch (IOException e) {
+            logger.error("Server error: " + e.getMessage());
             stop();
         }
+    }
+
+    public synchronized void broadcast(String message) {
+        for (ConnectionHandler connection : connections) {
+            connection.sendMessage("Server: " + message);
+        }
+    }
+
+    public void removeConnection(ConnectionHandler connection) {
+        connections.remove(connection);
     }
 
     public void stop() {
@@ -52,7 +67,7 @@ public class BlackjackServer implements Runnable {
             }
             server.close();
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            logger.error("Error while stopping server: " + e.getMessage());
         }
     }
 }
