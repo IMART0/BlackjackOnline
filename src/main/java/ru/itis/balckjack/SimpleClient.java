@@ -10,18 +10,16 @@ public class SimpleClient {
     public static void main(String[] args) {
         try (Socket socket = new Socket("localhost", 12345);
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            Scanner scanner = new Scanner(System.in)) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
             System.out.println("Подключено к серверу.");
 
             while (true) {
                 System.out.print("Введите ID команды (или -1 для выхода): ");
-                int commandId = scanner.nextInt();
-                if (commandId == -1) {
-                    break;
-                }
-                out.println(commandId);
+                out.println(1);
+                out.println(1);
+                out.println(1);
+                out.println(1);
             }
         } catch (IOException e) {
             e.printStackTrace();

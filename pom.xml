@@ -39,6 +39,17 @@
             <version>1.18.36</version>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>21.0.5</version> <!-- Убедитесь, что версия актуальна -->
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>21.0.5</version>
+        </dependency>
     </dependencies>
 
 </project>
