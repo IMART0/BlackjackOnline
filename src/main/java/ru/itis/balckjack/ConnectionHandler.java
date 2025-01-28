@@ -2,54 +2,39 @@ package ru.itis.balckjack;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.itis.balckjack.messages.clientQuery.BetMessage;
+import ru.itis.balckjack.messages.MessageParser;
 
 import java.io.*;
 import java.net.Socket;
 
 public class ConnectionHandler implements Runnable {
-    private static final Logger logger = LogManager.getLogger(ConnectionHandler.class);
+    private final Socket clientSocket;
 
-    private final Socket socket;
-    private final BlackjackServer server;
-    private PrintWriter out;
-    private BufferedReader in;
+    private final Logger logger = LogManager.getLogger(ConnectionHandler.class);
 
-    public ConnectionHandler(Socket socket, BlackjackServer server) {
-        this.socket = socket;
-        this.server = server;
+    public ConnectionHandler(Socket socket) {
+        this.clientSocket = socket;
     }
 
     @Override
     public void run() {
-        try {
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            out = new PrintWriter(socket.getOutputStream(), true);
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
 
-            String message;
-            while ((message = in.readLine()) != null) {
-                System.out.println(message);
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                BetMessage message = (BetMessage) MessageParser.parse(inputLine);
+                System.out.println(message.getPlayerID());
             }
         } catch (IOException e) {
-            logger.error("Connection error: {}", e.getMessage());
+            logger.error(e.getMessage(), e);
         } finally {
-            stop();
+            try {
+                clientSocket.close();
+            } catch (IOException e) {
+                logger.error(e.getMessage(), e);
+            }
         }
-    }
-
-    public void sendMessage(String message) {
-        if (out != null) {
-            out.println(message);
-        }
-    }
-
-    public void stop() {
-        try {
-            if (in != null) in.close();
-            if (out != null) out.close();
-            if (socket != null) socket.close();
-        } catch (IOException e) {
-            logger.error("Error while closing connection: {}", e.getMessage());
-        }
-        server.removeConnection(this);
     }
 }

@@ -39,7 +39,7 @@ public class BlackjackServer implements Runnable {
             while (!gameProcess.isGameFinished()) {
                 Socket client = server.accept();
                 logger.info("New client connected: " + client.getInetAddress());
-                ConnectionHandler connection = new ConnectionHandler(client, this);
+                ConnectionHandler connection = new ConnectionHandler(client);
                 connections.add(connection);
                 executor.execute(connection);
             }
@@ -50,21 +50,8 @@ public class BlackjackServer implements Runnable {
         }
     }
 
-    public synchronized void broadcast(String message) {
-        for (ConnectionHandler connection : connections) {
-            connection.sendMessage("Server: " + message);
-        }
-    }
-
-    public void removeConnection(ConnectionHandler connection) {
-        connections.remove(connection);
-    }
-
     public void stop() {
         try {
-            for (ConnectionHandler connection : connections) {
-                connection.stop();
-            }
             server.close();
         } catch (IOException e) {
             logger.error("Error while stopping server: " + e.getMessage());

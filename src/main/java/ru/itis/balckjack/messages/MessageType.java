@@ -1,6 +1,9 @@
-package ru.itis.balckjack;
+package ru.itis.balckjack.messages;
 
-public enum CommandType {
+import lombok.Getter;
+
+@Getter
+public enum MessageType {
     CONNECTED(0), //Клиент подает при подключении
     CONNECTIONACCEPTED(1), //  <currentPlayerID> [otherPlayerID] //Сервер отвечает при подключении (посылается всем)
     BET(2), // <playerID> <amount> //Ставка игрока
@@ -16,19 +19,16 @@ public enum CommandType {
 
     private final int id;
 
-    CommandType(int id) {
+    MessageType(int id) {
         this.id = id;
     }
 
-    public int getId() {
-        return id;
-    }
-    public static CommandType getById(int id) {
-        for (CommandType value : CommandType.values()) {
-            if (value.getId() == id) {
-                return value;
+    public static MessageType fromId(int id) {
+        for (MessageType type : values()) {
+            if (type.id == id) {
+                return type;
             }
         }
-        throw new IllegalArgumentException("No enum constant with id " + id);
+        throw new IllegalArgumentException("Unknown MessageType ID: " + id);
     }
 }
