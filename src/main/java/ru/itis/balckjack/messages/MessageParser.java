@@ -4,6 +4,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.itis.balckjack.messages.clientQuery.BetMessage;
 import ru.itis.balckjack.messages.clientQuery.ConnectedMessage;
+import ru.itis.balckjack.messages.clientQuery.EndMoveMessage;
+import ru.itis.balckjack.messages.clientQuery.RequestCardMessage;
+import ru.itis.balckjack.messages.serverAnswer.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,6 +61,87 @@ public class MessageParser {
                     throw new IllegalArgumentException("Invalid number format in BET message: " + rawMessage, e);
                 }
             }
+            case BETACCEPTED -> {
+                try {
+                    int playerID = Integer.parseInt(attributes.get("betPlayerID"));
+                    int amount = Integer.parseInt(attributes.get("amount"));
+                    yield new BetAcceptedMessage(playerID, amount);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid number format in BET message: " + rawMessage, e);
+                }
+            }
+            case CONNECTIONACCEPTED -> {
+                try {
+                    int currentPlayerID = Integer.parseInt(attributes.get("currentPlayerID"));
+                    if (attributes.containsKey("otherPlayerID")) {
+                        int otherPlayerID = Integer.parseInt(attributes.get("otherPlayerID"));
+                        yield new ConnectionAcceptedMessage(currentPlayerID, otherPlayerID);
+                    } else {
+                        yield new ConnectionAcceptedMessage(currentPlayerID);
+                    }
+
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid number format in BET message: " + rawMessage, e);
+                }
+            }
+            case DEALLERFIRSTCARD -> {
+                try {
+                    int cardID = Integer.parseInt(attributes.get("cardID"));
+                    yield new DealerFirstCardMessage(cardID);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException();
+                }
+            }
+            case RECEIVEDCARD -> {
+                try {
+                    int cardID = Integer.parseInt(attributes.get("cardID"));
+                    yield new ReceivedCardMessage(cardID);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException();
+                }
+            }
+            case GOTCARD -> {
+                try {
+                    int playerID = Integer.parseInt(attributes.get("playerID"));
+                    yield new GotCardMessage(playerID);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException();
+                }
+            }
+            case REQUESTCARD -> {
+                try {
+                    int playerID = Integer.parseInt(attributes.get("playerID"));
+                    yield new RequestCardMessage(playerID);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException();
+                }
+            }
+            case ENDMOVE -> {
+                try {
+                    int playerID = Integer.parseInt(attributes.get("playerID"));
+                    yield new EndMoveMessage(playerID);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException();
+                }
+            }
+            case DEALLERCARD -> {
+                try {
+                    int cardID = Integer.parseInt(attributes.get("cardID"));
+                    yield new DealerCardMessage(cardID);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException();
+                }
+            }
+            case WINNER -> {
+                try {
+                    int playerID = Integer.parseInt(attributes.get("playerID"));
+                    int balance = Integer.parseInt(attributes.get("balance"));
+                    yield new WinnerMessage(playerID, balance);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid number format in BET message: " + rawMessage, e);
+                }
+            }
+            case NEWGAME -> new NewGameMessage();
             default -> throw new IllegalArgumentException("Unknown message type: " + type);
         };
     }

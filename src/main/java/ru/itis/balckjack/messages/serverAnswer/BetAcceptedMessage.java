@@ -4,15 +4,21 @@ import ru.itis.balckjack.messages.Message;
 import ru.itis.balckjack.messages.MessageType;
 
 public class BetAcceptedMessage extends Message {
+    private final int betPlayerID;
+    private final int amount;
 
 
-
-    public BetAcceptedMessage(MessageType type) {
-        super(type);
+    public BetAcceptedMessage(int betPlayerID, int amount) {
+        super(MessageType.BETACCEPTED);
+        this.betPlayerID = betPlayerID;
+        this.amount = amount;
     }
 
     @Override
     public String toMessageString() {
-        return "";
+        return "type:3;attributes:{betPlayerID:%s;amount:%s}".formatted(
+                betPlayerID,
+                amount
+        );
     }
 }

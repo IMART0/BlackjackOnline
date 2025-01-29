@@ -11,4 +11,11 @@ public abstract class Message {
     }
 
     public abstract String toMessageString();
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "type=" + type +
+                '}';
+    }
 }

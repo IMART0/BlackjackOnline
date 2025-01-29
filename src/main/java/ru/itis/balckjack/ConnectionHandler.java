@@ -2,6 +2,7 @@ package ru.itis.balckjack;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.itis.balckjack.messages.Message;
 import ru.itis.balckjack.messages.clientQuery.BetMessage;
 import ru.itis.balckjack.messages.MessageParser;
 
@@ -24,8 +25,8 @@ public class ConnectionHandler implements Runnable {
 
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
-                BetMessage message = (BetMessage) MessageParser.parse(inputLine);
-                System.out.println(message.getPlayerID());
+                Message message = MessageParser.parse(inputLine);
+                System.out.println(message);
             }
         } catch (IOException e) {
             logger.error(e.getMessage(), e);

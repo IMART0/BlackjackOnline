@@ -9,19 +9,22 @@ public class ConnectionAcceptedMessage extends Message {
     private final int currentPlayerID;
     private Integer otherPlayerID = null;
 
-    public ConnectionAcceptedMessage(MessageType type, int currentPlayerID, int otherPlayerID) {
-        super(type);
+    public ConnectionAcceptedMessage(int currentPlayerID, int otherPlayerID) {
+        super(MessageType.CONNECTIONACCEPTED);
         this.currentPlayerID = currentPlayerID;
         this.otherPlayerID = otherPlayerID;
     }
 
-    public ConnectionAcceptedMessage(MessageType type, int currentPlayerID) {
-        super(type);
+    public ConnectionAcceptedMessage(int currentPlayerID) {
+        super(MessageType.CONNECTIONACCEPTED);
         this.currentPlayerID = currentPlayerID;
     }
 
     @Override
     public String toMessageString() {
+        if (otherPlayerID == null)
+            return "type:" + getType().getId() + ";attributes:{currentPlayerID:" + currentPlayerID + "}";
+
         return "type:" + getType().getId() + ";attributes:{currentPlayerID:" + currentPlayerID + ";" +
                 "otherPlayerID:" + otherPlayerID + "}";
     }
