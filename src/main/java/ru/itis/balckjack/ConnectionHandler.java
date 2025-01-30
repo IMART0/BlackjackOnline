@@ -11,31 +11,53 @@ import java.net.Socket;
 
 public class ConnectionHandler implements Runnable {
     private final Socket clientSocket;
+    private final BlackjackServer server;
+    private BufferedReader in;
+    private PrintWriter out;
 
     private final Logger logger = LogManager.getLogger(ConnectionHandler.class);
 
-    public ConnectionHandler(Socket socket) {
-        this.clientSocket = socket;
+    public ConnectionHandler(Socket client, BlackjackServer blackjackServer) {
+        this.clientSocket = client;
+        server = blackjackServer;
     }
 
     @Override
     public void run() {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+        try {
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            out = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()), true);
 
-            String inputLine;
-            while ((inputLine = in.readLine()) != null) {
-                Message message = MessageParser.parse(inputLine);
-                System.out.println(message);
+            String message;
+            while ((message = in.readLine()) != null) {
+                logger.info("Получено сообщение от клиента: {}", message);
+                server.broadcast(message);
             }
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+        } catch (Exception e) {
+            logger.error("Ошибка связи с клиентом: {}", e.getMessage(), e);
         } finally {
             try {
                 clientSocket.close();
-            } catch (IOException e) {
-                logger.error(e.getMessage(), e);
+            } catch (Exception e) {
+                logger.error("Ошибка закрытия соединения: {}", e.getMessage(), e);
             }
+        }
+    }
+
+    public void sendMessage(String message) {
+        if (out != null) {
+            out.println(message);
+            logger.info("Отправлено клиенту: {}", message);
+        }
+    }
+
+    public void close() {
+        try {
+            clientSocket.close();
+            in.close();
+            out.close();
+        } catch (IOException e) {
+            logger.error(e.getMessage());
         }
     }
 }
