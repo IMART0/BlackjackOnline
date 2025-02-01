@@ -100,14 +100,6 @@ public class MessageParser {
                     throw new IllegalArgumentException();
                 }
             }
-            case GOTCARD -> {
-                try {
-                    int playerID = Integer.parseInt(attributes.get("playerID"));
-                    yield new GotCardMessage(playerID);
-                } catch (NumberFormatException e) {
-                    throw new IllegalArgumentException();
-                }
-            }
             case REQUESTCARD -> {
                 try {
                     int playerID = Integer.parseInt(attributes.get("playerID"));

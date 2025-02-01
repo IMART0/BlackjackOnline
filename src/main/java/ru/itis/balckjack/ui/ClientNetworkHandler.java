@@ -49,7 +49,6 @@ public class ClientNetworkHandler {
     public void sendCommand(Message message) {
         if (out != null) {
             out.println(message.toMessageString());
-            System.out.println("Отправлено: " + message.toMessageString());
         }
     }
 

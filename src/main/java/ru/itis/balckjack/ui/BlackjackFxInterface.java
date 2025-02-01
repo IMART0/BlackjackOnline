@@ -81,19 +81,7 @@ public class BlackjackFxInterface extends Application {
                     if (connectionAcceptedMessage.getOtherPlayerID() != null) {
                         drawMainScene();
                     } else {
-                        Label titleLabel = new Label("Blackjack Online");
-                        titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 24));
-                        titleLabel.setStyle("-fx-text-fill: white;");
-
-                        Label messageLabel = new Label("Вы успешно подключены,\nожидайте второго игрока");
-                        messageLabel.setFont(Font.font("Arial", 16));
-                        messageLabel.setStyle("-fx-text-fill: white;");
-
-                        VBox vbox = new VBox(20, titleLabel, messageLabel);
-                        vbox.setAlignment(Pos.CENTER);
-                        vbox.setStyle("-fx-background-color: #2C3E50; -fx-padding: 30px;");
-
-                        globalStage.setScene(new Scene(vbox, 400, 300));
+                        drawWaitConnectionScene();
                     }
                     break;
                 case BETACCEPTED:
@@ -103,6 +91,22 @@ public class BlackjackFxInterface extends Application {
                 // Добавьте обработку других типов сообщений
             }
         });
+    }
+
+    private void drawWaitConnectionScene() {
+        Label titleLabel = new Label("Blackjack Online");
+        titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 24));
+        titleLabel.setStyle("-fx-text-fill: white;");
+
+        Label messageLabel = new Label("Вы успешно подключены,\nожидайте второго игрока");
+        messageLabel.setFont(Font.font("Arial", 16));
+        messageLabel.setStyle("-fx-text-fill: white;");
+
+        VBox vbox = new VBox(20, titleLabel, messageLabel);
+        vbox.setAlignment(Pos.CENTER);
+        vbox.setStyle("-fx-background-color: #2C3E50; -fx-padding: 30px;");
+
+        globalStage.setScene(new Scene(vbox, 400, 300));
     }
 
     private void drawMainScene() {
