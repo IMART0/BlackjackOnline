@@ -3,6 +3,10 @@ package ru.itis.balckjack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.itis.balckjack.gamelogic.GameProcess;
+import ru.itis.balckjack.messages.Message;
+import ru.itis.balckjack.messages.MessageParser;
+import ru.itis.balckjack.messages.clientQuery.BetMessage;
+import ru.itis.balckjack.messages.serverAnswer.BetAcceptedMessage;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -15,7 +19,7 @@ public class BlackjackServer implements Runnable {
 
     private final Logger logger = LogManager.getLogger(BlackjackServer.class);
     private final ArrayList<ConnectionHandler> connections;
-    private final GameProcess gameProcess;
+    public final GameProcess gameProcess;
 
     private ServerSocket server;
 
@@ -59,8 +63,22 @@ public class BlackjackServer implements Runnable {
 
     public void broadcast(String message) {
         for (ConnectionHandler connection : connections) {
-            if (connection!=null)
+            if (connection != null)
                 connection.sendMessage(message);
+        }
+    }
+
+    public void handleMessage(String message, ConnectionHandler handler) {
+        Message parsedMessage = MessageParser.parse(message);
+        switch (parsedMessage.getType()) {
+            case BET:
+                BetMessage betMessage = (BetMessage) parsedMessage;
+                int playerID = betMessage.getPlayerID();
+                int amount = betMessage.getAmount();
+                // Здесь можно добавить логику проверки ставки
+                broadcast(new BetAcceptedMessage(playerID, amount).toMessageString());
+                break;
+            // Добавьте обработку других типов сообщений
         }
     }
 }

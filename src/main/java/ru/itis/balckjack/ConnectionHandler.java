@@ -2,9 +2,12 @@ package ru.itis.balckjack;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.itis.balckjack.exceptions.PlayersLimitException;
+import ru.itis.balckjack.gamelogic.States;
 import ru.itis.balckjack.messages.Message;
 import ru.itis.balckjack.messages.clientQuery.BetMessage;
 import ru.itis.balckjack.messages.MessageParser;
+import ru.itis.balckjack.messages.serverAnswer.ConnectionAcceptedMessage;
 
 import java.io.*;
 import java.net.Socket;
@@ -27,11 +30,29 @@ public class ConnectionHandler implements Runnable {
         try {
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             out = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()), true);
+            // Этап подключения
+            int clientID = -1;
+            while (server.gameProcess.state() == States.PlayersInit) {
+                if (!server.gameProcess.contains(clientID)) {
+                    if ((clientID = server.gameProcess.initNewPlayer(clientSocket)) != -1) {
+                        if (server.gameProcess.getOtherPlayerID() != -1)
+                            server.broadcast(new ConnectionAcceptedMessage(
+                                    clientID,
+                                    server.gameProcess.getOtherPlayerID()).toMessageString()
+                            );
+                        else
+                            server.broadcast(new ConnectionAcceptedMessage(
+                                    clientID).toMessageString()
+                            );
+                    } else throw new PlayersLimitException();
+                    logger.info("Подключен игрок");
+                }
+            }
 
             String message;
             while ((message = in.readLine()) != null) {
                 logger.info("Получено сообщение от клиента: {}", message);
-                server.broadcast(message);
+                server.handleMessage(message, this);
             }
         } catch (Exception e) {
             logger.error("Ошибка связи с клиентом: {}", e.getMessage(), e);

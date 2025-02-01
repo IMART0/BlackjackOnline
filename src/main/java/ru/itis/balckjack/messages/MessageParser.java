@@ -142,7 +142,6 @@ public class MessageParser {
                 }
             }
             case NEWGAME -> new NewGameMessage();
-            default -> throw new IllegalArgumentException("Unknown message type: " + type);
         };
     }
 }

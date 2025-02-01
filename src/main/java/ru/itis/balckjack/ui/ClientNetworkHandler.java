@@ -3,6 +3,7 @@ package ru.itis.balckjack.ui;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.itis.balckjack.messages.Message;
+import ru.itis.balckjack.messages.MessageParser;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -26,8 +27,6 @@ public class ClientNetworkHandler {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             new Thread(this::listenToServer).start(); // Запускаем поток для чтения сообщений
-
-            System.out.println("Подключено к серверу.");
         } catch (Exception e) {
             logger.error("Ошибка подключения: {}", e.getMessage(), e);
         }
