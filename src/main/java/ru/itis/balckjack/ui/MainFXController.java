@@ -18,6 +18,8 @@ import ru.itis.balckjack.messages.Message;
 import ru.itis.balckjack.messages.MessageParser;
 import ru.itis.balckjack.messages.clientQuery.BetMessage;
 import ru.itis.balckjack.messages.clientQuery.ConnectedMessage;
+import ru.itis.balckjack.messages.clientQuery.EndMoveMessage;
+import ru.itis.balckjack.messages.clientQuery.RequestCardMessage;
 import ru.itis.balckjack.messages.serverAnswer.*;
 
 import java.io.IOException;
@@ -38,11 +40,23 @@ public class MainFXController {
     @FXML private HBox player1Cards;
     @FXML private HBox player2Cards;
     @FXML private HBox dealerCards;
+    @FXML private VBox player1BalanceBox;
+    @FXML private VBox player2BalanceBox;
+
+    // Добавляем вспомогательные переменные
+    private int currentBet = 0;
+    private boolean isPlayerTurn = false;
     private boolean dealerHasHiddenCard = false;
 
     @FXML private VBox actionButtonsBox;
     @FXML private Button requestCardButton;
     @FXML private Button endMoveButton;
+
+    private void updatePlayerBalance(VBox balanceBox, int balance, int bet, int score) {
+        ((Label) balanceBox.getChildren().get(1)).setText(String.valueOf(balance));
+        ((Label) balanceBox.getChildren().get(3)).setText(String.valueOf(bet));
+        ((Label) balanceBox.getChildren().get(5)).setText(String.valueOf(score));
+    }
 
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -63,6 +77,8 @@ public class MainFXController {
             if (bet >= 1 && bet <= player.getBalance()) {
                 networkHandler.sendCommand(new BetMessage(player.getId(), bet));
                 showAlert("Ставка принята", "Ваша ставка в размере " + bet + " принята.", Alert.AlertType.INFORMATION);
+                currentBet = bet;
+                actionButtonsBox.setVisible(true);
                 betButton.setDisable(true);
                 betField.setDisable(true);
             } else {
@@ -71,6 +87,17 @@ public class MainFXController {
         } else {
             showAlert("Предупреждение", "Введите сумму ставки!", Alert.AlertType.WARNING);
         }
+    }
+
+    @FXML
+    private void handleRequestCard() {
+        networkHandler.sendCommand(new RequestCardMessage(player.getId()));
+    }
+
+    @FXML
+    private void handleEndMove() {
+        networkHandler.sendCommand(new EndMoveMessage(player.getId()));
+        actionButtonsBox.setVisible(false);
     }
 
     private void handleServerMessage(String message) {
@@ -166,6 +193,29 @@ public class MainFXController {
         } else if (playerId == -1) { // ID дилера
             dealerCards.getChildren().add(cardImage);
         }
+    }
+
+    private int calculateHandValue() {
+        int sum = 0;
+        int aces = 0;
+
+        for (Integer cardId : player.getHand()) {
+            int value = (cardId / 4) + 2;
+            if (value > 11 && value != 14) value = 10; // J/Q/K
+            if (value == 14) { // Ace
+                aces++;
+                value = 11;
+            }
+            sum += value;
+        }
+
+        // Обработка тузов
+        while (sum > 21 && aces > 0) {
+            sum -= 10;
+            aces--;
+        }
+
+        return sum;
     }
 
     private String convertCardIdToImagePath(int cardId) {
