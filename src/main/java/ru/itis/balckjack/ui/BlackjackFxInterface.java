@@ -15,7 +15,7 @@ public class BlackjackFxInterface extends Application {
         controller.setPrimaryStage(primaryStage);
 
         primaryStage.setTitle("Blackjack Online");
-        primaryStage.setScene(new Scene(root, 400, 300));
+        primaryStage.setScene(new Scene(root, 680, 510));
         primaryStage.setResizable(false);
         primaryStage.show();
     }

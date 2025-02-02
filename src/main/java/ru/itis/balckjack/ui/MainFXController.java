@@ -6,6 +6,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import ru.itis.balckjack.gamelogic.model.Player;
 import ru.itis.balckjack.messages.Message;
@@ -24,6 +25,7 @@ public class MainFXController {
 
     @FXML private Label messageLabel;
     @FXML private Button connectButton;
+    @FXML private StackPane betBox;
     @FXML private TextField betField;
     @FXML private Button betButton;
 
@@ -70,7 +72,10 @@ public class MainFXController {
                     }
                     break;
                 case BETACCEPTED:
-                    // Handle bet acceptance
+                    BetAcceptedMessage bam = (BetAcceptedMessage) parsedMessage;
+                    if (bam.getBetPlayerID() == player.getId()) {
+                        betBox.setVisible(false);
+                    }
                     break;
             }
         });
@@ -81,13 +86,12 @@ public class MainFXController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
 
-            // Получаем контроллер из FXML-файла
             MainFXController controller = loader.getController();
             controller.setPrimaryStage(primaryStage);
-            controller.setNetworkHandler(networkHandler);  // Передаем networkHandler
-            controller.setPlayer(player);  // Передаем player
+            controller.setNetworkHandler(networkHandler);
+            controller.setPlayer(player);
 
-            primaryStage.setScene(new Scene(root));
+            primaryStage.setScene(new Scene(root, 680, 510));
         } catch (IOException e) {
             e.printStackTrace();
         }
