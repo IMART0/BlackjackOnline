@@ -55,7 +55,7 @@ public class ClientNetworkHandler {
     public void sendCommand(Message message) {
         if (out != null) {
             out.println(message.toMessageString());
-            System.out.printf("Отправлено: %s%n", message);
+            System.out.println("Отправлено: %s".formatted(message.toMessageString()));
         }
     }
 
