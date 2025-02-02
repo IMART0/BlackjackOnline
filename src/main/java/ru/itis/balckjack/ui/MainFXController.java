@@ -10,7 +10,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import ru.itis.balckjack.gamelogic.GameProcess;
 import ru.itis.balckjack.gamelogic.model.Player;
 import ru.itis.balckjack.messages.Message;
 import ru.itis.balckjack.messages.MessageParser;
@@ -19,10 +21,12 @@ import ru.itis.balckjack.messages.clientQuery.ConnectedMessage;
 import ru.itis.balckjack.messages.serverAnswer.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class MainFXController {
     private ClientNetworkHandler networkHandler;
     private Player player;
+    final private GameProcess gameProcess = GameProcess.getInstance();
     private Stage primaryStage;
 
     @FXML private Label messageLabel;
@@ -35,6 +39,10 @@ public class MainFXController {
     @FXML private HBox player2Cards;
     @FXML private HBox dealerCards;
     private boolean dealerHasHiddenCard = false;
+
+    @FXML private VBox actionButtonsBox;
+    @FXML private Button requestCardButton;
+    @FXML private Button endMoveButton;
 
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -73,6 +81,7 @@ public class MainFXController {
                     ConnectionAcceptedMessage cam = (ConnectionAcceptedMessage) parsedMessage;
                     if (player == null) {
                         player = new Player(cam.getCurrentPlayerID(), 1000, null);
+                        player.setHand(new ArrayList<>());
                     }
                     if (cam.getOtherPlayerID() != null) {
                         loadScene("/main-scene.fxml");
