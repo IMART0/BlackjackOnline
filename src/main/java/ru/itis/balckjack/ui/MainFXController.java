@@ -27,8 +27,11 @@ import java.util.ArrayList;
 
 public class MainFXController {
     private ClientNetworkHandler networkHandler;
-    private Player player;
-    final private GameProcess gameProcess = GameProcess.getInstance();
+    private Player currentPlayer;
+    private Player otherPlayer;
+
+    private boolean currentPlayerReady = false;
+    private boolean otherPlayerReady = false;
     private Stage primaryStage;
 
     @FXML private Label messageLabel;
@@ -52,10 +55,25 @@ public class MainFXController {
     @FXML private Button requestCardButton;
     @FXML private Button endMoveButton;
 
-    private void updatePlayerBalance(VBox balanceBox, int balance, int bet, int score) {
-        ((Label) balanceBox.getChildren().get(1)).setText(String.valueOf(balance));
-        ((Label) balanceBox.getChildren().get(3)).setText(String.valueOf(bet));
-        ((Label) balanceBox.getChildren().get(5)).setText(String.valueOf(score));
+    private void updateUI() {
+        updatePlayerBox(player1BalanceBox,
+                currentPlayer.getId() == 0 ? currentPlayer : otherPlayer);
+        updatePlayerBox(player2BalanceBox,
+                currentPlayer.getId() == 1 ? currentPlayer : otherPlayer);
+    }
+
+    private void updatePlayerBox(VBox balanceBox, Player player) {
+        Platform.runLater(() -> {
+            ((Label) balanceBox.getChildren().get(1)).setText(String.valueOf(player.getBalance()));
+            ((Label) balanceBox.getChildren().get(3)).setText(
+                    player.getBet() != null ? String.valueOf(player.getBet()) : "0"
+            );
+            ((Label) balanceBox.getChildren().get(5)).setText(String.valueOf(player.score()));
+        });
+    }
+
+    private Player resolvePlayer(int playerId) {
+        return playerId == currentPlayer.getId() ? currentPlayer : otherPlayer;
     }
 
     public void setPrimaryStage(Stage primaryStage) {
@@ -74,15 +92,15 @@ public class MainFXController {
         String betValue = betField.getText();
         if (!betValue.isEmpty()) {
             int bet = Integer.parseInt(betValue);
-            if (bet >= 1 && bet <= player.getBalance()) {
-                networkHandler.sendCommand(new BetMessage(player.getId(), bet));
+            if (bet >= 1 && bet <= currentPlayer.getBalance()) {
+                networkHandler.sendCommand(new BetMessage(currentPlayer.getId(), bet));
                 showAlert("Ставка принята", "Ваша ставка в размере " + bet + " принята.", Alert.AlertType.INFORMATION);
                 currentBet = bet;
-                actionButtonsBox.setVisible(true);
                 betButton.setDisable(true);
                 betField.setDisable(true);
+                updateUI();
             } else {
-                showAlert("Ошибка", "Некорректная ставка! Введите сумму от 1 до " + player.getBalance() + ".", Alert.AlertType.ERROR);
+                showAlert("Ошибка", "Некорректная ставка! Введите сумму от 1 до " + currentPlayer.getBalance() + ".", Alert.AlertType.ERROR);
             }
         } else {
             showAlert("Предупреждение", "Введите сумму ставки!", Alert.AlertType.WARNING);
@@ -91,12 +109,12 @@ public class MainFXController {
 
     @FXML
     private void handleRequestCard() {
-        networkHandler.sendCommand(new RequestCardMessage(player.getId()));
+        networkHandler.sendCommand(new RequestCardMessage(currentPlayer.getId()));
     }
 
     @FXML
     private void handleEndMove() {
-        networkHandler.sendCommand(new EndMoveMessage(player.getId()));
+        networkHandler.sendCommand(new EndMoveMessage(currentPlayer.getId()));
         actionButtonsBox.setVisible(false);
     }
 
@@ -106,9 +124,11 @@ public class MainFXController {
             switch (parsedMessage.getType()) {
                 case CONNECTIONACCEPTED:
                     ConnectionAcceptedMessage cam = (ConnectionAcceptedMessage) parsedMessage;
-                    if (player == null) {
-                        player = new Player(cam.getCurrentPlayerID(), 1000, null);
-                        player.setHand(new ArrayList<>());
+                    if (currentPlayer == null) {
+                        currentPlayer = new Player(cam.getCurrentPlayerID(), 1000, null);
+                        currentPlayer.setHand(new ArrayList<>());
+                        otherPlayer = new Player(cam.getCurrentPlayerID() == 0 ? 1 : 0, 1000, null);
+                        otherPlayer.setHand(new ArrayList<>());
                     }
                     if (cam.getOtherPlayerID() != null) {
                         loadScene("/main-scene.fxml");
@@ -118,14 +138,26 @@ public class MainFXController {
                     break;
                 case BETACCEPTED:
                     BetAcceptedMessage bam = (BetAcceptedMessage) parsedMessage;
-                    if (bam.getBetPlayerID() == player.getId()) {
+                    if (bam.getBetPlayerID() == currentPlayer.getId()) {
+                        currentPlayerReady = true;
                         betBox.setVisible(false);
-                        if (player.getId() == 0) {
+                        if (currentPlayer.getId() == 0) {
                             player1Cards.setOpacity(1.);
                         } else {
                             player2Cards.setOpacity(1.);
                         }
+                    } else {
+                        otherPlayerReady = true;
                     }
+                    if (currentPlayerReady && otherPlayerReady) actionButtonsBox.setVisible(true);
+                    System.out.print(currentPlayerReady);
+                    System.out.println(otherPlayerReady);
+
+                    Player targetPlayer = resolvePlayer(bam.getBetPlayerID());
+                    targetPlayer.setBet(bam.getAmount());
+                    targetPlayer.setBalance(1000-bam.getAmount());
+                    updateUI();
+
                     break;
                 case RECEIVEDCARD:
                     ReceivedCardMessage rcm = (ReceivedCardMessage) parsedMessage;
@@ -150,7 +182,8 @@ public class MainFXController {
 
         // Добавляем рубашкой вверх
         ImageView hiddenCard = new ImageView(new Image(getClass().getResourceAsStream("/images/rect_cards/card_back.png")));
-        hiddenCard.setFitWidth(80);
+        hiddenCard.setUserData("HIDDEN_CARD");
+        hiddenCard.setFitWidth(60);
         hiddenCard.setPreserveRatio(true);
         dealerCards.getChildren().add(hiddenCard);
         dealerHasHiddenCard = true;
@@ -160,7 +193,9 @@ public class MainFXController {
         // Удаляем все скрытые карты
         if(dealerHasHiddenCard) {
             dealerCards.getChildren().removeIf(node ->
-                    ((ImageView) node).getImage().getUrl().contains("card_back.png"));
+                    node instanceof ImageView &&
+                    "HIDDEN_CARD".equals(((ImageView) node).getUserData())
+            );
             dealerHasHiddenCard = false;
         }
 
@@ -171,23 +206,23 @@ public class MainFXController {
     private void addDealerCard(int cardId) {
         String imagePath = convertCardIdToImagePath(cardId);
         ImageView cardImage = new ImageView(new Image(getClass().getResourceAsStream(imagePath)));
-        cardImage.setFitWidth(80);
+        cardImage.setFitWidth(60);
         cardImage.setPreserveRatio(true);
         dealerCards.getChildren().add(cardImage);
     }
 
     private void handleReceivedCard(int playerId, int cardId) {
         // Добавляем карту игроку в модель
-        if (player.getId() == playerId) {
-            player.getHand().add(cardId);
-        }
+        Player targetPlayer = resolvePlayer(playerId);
+        targetPlayer.addCard(cardId);
+        updateUI();
 
         // Получаем путь к изображению карты
         String imagePath = convertCardIdToImagePath(cardId);
 
         // Создаем элемент для отображения карты
         ImageView cardImage = new ImageView(new Image(getClass().getResourceAsStream(imagePath)));
-        cardImage.setFitWidth(80);
+        cardImage.setFitWidth(60);
         cardImage.setPreserveRatio(true);
 
         // Добавляем в соответствующий HBox
@@ -196,29 +231,15 @@ public class MainFXController {
         } else if (playerId == 1) {
             player2Cards.getChildren().add(cardImage);
         }
+
+        if (targetPlayer == currentPlayer && targetPlayer.score() > 21) {
+            handleBust();
+        }
     }
 
-    private int calculateHandValue() {
-        int sum = 0;
-        int aces = 0;
-
-        for (Integer cardId : player.getHand()) {
-            int value = (cardId / 4) + 2;
-            if (value > 11 && value != 14) value = 10; // J/Q/K
-            if (value == 14) { // Ace
-                aces++;
-                value = 11;
-            }
-            sum += value;
-        }
-
-        // Обработка тузов
-        while (sum > 21 && aces > 0) {
-            sum -= 10;
-            aces--;
-        }
-
-        return sum;
+    private void handleBust() {
+        handleEndMove();
+        showAlert("Перебор!", "Сумма очков: " + currentPlayer.score(), Alert.AlertType.WARNING);
     }
 
     private String convertCardIdToImagePath(int cardId) {
@@ -245,7 +266,7 @@ public class MainFXController {
             MainFXController controller = loader.getController();
             controller.setPrimaryStage(primaryStage);
             controller.setNetworkHandler(networkHandler);
-            controller.setPlayer(player);
+            controller.setPlayers(currentPlayer, otherPlayer);
             networkHandler.setMessageListener(controller::handleServerMessage);
 
             primaryStage.setScene(new Scene(root, 680, 510));
@@ -258,8 +279,9 @@ public class MainFXController {
         this.networkHandler = networkHandler;
     }
 
-    public void setPlayer(Player player) {
-        this.player = player;
+    public void setPlayers(Player currentPlayer, Player otherPlayer) {
+        this.currentPlayer = currentPlayer;
+        this.otherPlayer = otherPlayer;
     }
 
     private void showAlert(String title, String content, Alert.AlertType type) {

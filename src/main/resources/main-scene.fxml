@@ -29,7 +29,7 @@
        </Label>
 
               <!-- Dealer Section -->
-        <VBox alignment="CENTER" layoutX="211.0" layoutY="28.0" prefHeight="217.0" prefWidth="262.0" spacing="10">
+        <VBox alignment="CENTER" layoutX="139.0" layoutY="28.0" prefHeight="217.0" prefWidth="403.0" spacing="10">
             <Label style="-fx-text-fill: white;" text="Дилер">
                 <font>
                     <Font name="Arial" size="16" />
