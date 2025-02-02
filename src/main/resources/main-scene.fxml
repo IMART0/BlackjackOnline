@@ -14,7 +14,7 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane centerShape="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="510.0" prefWidth="680.0" scaleShape="false" style="-fx-background-color: #2C3E50;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.itis.balckjack.ui.MainFXController">
+<AnchorPane centerShape="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="510.0" prefWidth="680.0" scaleShape="false" style="-fx-background-color: #2C3E50;" xmlns="http://javafx.com/javafx/21.0.5" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.itis.balckjack.ui.MainFXController">
    <children>
       <ImageView fitHeight="313.0" fitWidth="560.0" layoutX="60.0" layoutY="143.0" pickOnBounds="true" preserveRatio="true">
          <image>
