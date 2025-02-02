@@ -72,6 +72,13 @@ public class BlackjackServer implements Runnable {
         }
     }
 
+    public void broadcastForOther(String message, ConnectionHandler handlerExcept) {
+        for (ConnectionHandler connection : connections) {
+            if (connection != null && connection != handlerExcept)
+                connection.sendMessage(message);
+        }
+    }
+
     public void handleMessage(String message, ConnectionHandler handler) throws PlayersLimitException {
         Message parsedMessage = MessageParser.parse(message);
         switch (parsedMessage.getType()) {

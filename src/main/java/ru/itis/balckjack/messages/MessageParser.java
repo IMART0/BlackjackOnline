@@ -94,8 +94,9 @@ public class MessageParser {
             }
             case RECEIVEDCARD -> {
                 try {
+                    int playerID = Integer.parseInt(attributes.get("playerID"));
                     int cardID = Integer.parseInt(attributes.get("cardID"));
-                    yield new ReceivedCardMessage(cardID);
+                    yield new ReceivedCardMessage(playerID, cardID);
                 } catch (NumberFormatException e) {
                     throw new IllegalArgumentException();
                 }

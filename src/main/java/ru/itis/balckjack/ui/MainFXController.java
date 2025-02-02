@@ -64,7 +64,9 @@ public class MainFXController {
             switch (parsedMessage.getType()) {
                 case CONNECTIONACCEPTED:
                     ConnectionAcceptedMessage cam = (ConnectionAcceptedMessage) parsedMessage;
-                    player = new Player(cam.getCurrentPlayerID(), 1000, null);
+                    if (player == null) {
+                        player = new Player(cam.getCurrentPlayerID(), 1000, null);
+                    }
                     if (cam.getOtherPlayerID() != null) {
                         loadScene("/main-scene.fxml");
                     } else {
