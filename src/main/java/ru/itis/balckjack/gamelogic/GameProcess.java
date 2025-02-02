@@ -2,44 +2,60 @@ package ru.itis.balckjack.gamelogic;
 
 import ru.itis.balckjack.gamelogic.model.Player;
 
-import java.net.Socket;
+import java.util.ArrayList;
 
 public class GameProcess {
-    private boolean isGameFinished = false;
-    private final Player[] players;
-    private States state;
+    private static boolean isGameFinished = false;
+    private ArrayList<Player> players;
+    private static GameProcess gameProcess;
 
-    public GameProcess() {
-        players = new Player[2];
-        state = States.PlayersInit;
+    public static GameProcess getInstance() {
+        if (gameProcess == null) {
+            synchronized (GameProcess.class) {
+                if (gameProcess == null) {
+                    gameProcess = new GameProcess();
+                }
+            }
+        }
+        return gameProcess;
     }
 
-    public boolean isGameFinished() {
+    private GameProcess() {
+        players = new ArrayList<>();
+    }
+
+    public static boolean isGameFinished() {
         return isGameFinished;
     }
 
-    public int initNewPlayer(Socket clientSocket) {
-        for (int i = 0; i < 2; i++) {
-            if (players[i] == null) {
-                players[i] = new Player(i, 1000, clientSocket);
-                return i;
-            }
+    public int playersCount() {
+        return players.size();
+    }
+
+    // Метод для обработки ставки игрока
+    public boolean placeBet(int playerID, int amount) {
+        if (playerID < 0 || playerID >= players.size() || players.get(playerID) == null) {
+            return false; // Игрок не найден
         }
-        return -1;
+
+        Player player = players.get(playerID);
+        if (player.getBalance() >= amount) {
+            player.setBalance(player.getBalance() - amount);
+            player.setBet(amount);
+            return true;
+        }
+        return false; // Недостаточно средств
     }
 
-    public int getOtherPlayerID() {
-        if (players[1] != null)
-            return players[0].getId();
-        else
-            return -1;
+    public boolean areAllBetsPlaced() {
+        return players.get(0).getBet() != null && players.get(1).getBet() != null;
     }
 
-    public States state() {
-        return state;
+    public void initNewPlayer(Player player) {
+        players.add(player);
     }
 
-    public boolean contains(int clientID) {
-        return clientID != -1 && players[clientID] != null;
+    public Player getPlayer(int playerID) {
+        return players.get(playerID);
     }
 }

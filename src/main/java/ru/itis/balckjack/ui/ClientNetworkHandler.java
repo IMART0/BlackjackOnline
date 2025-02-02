@@ -1,9 +1,11 @@
 package ru.itis.balckjack.ui;
 
+import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.itis.balckjack.gamelogic.GameProcess;
+import ru.itis.balckjack.gamelogic.model.Player;
 import ru.itis.balckjack.messages.Message;
-import ru.itis.balckjack.messages.MessageParser;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -15,6 +17,10 @@ public class ClientNetworkHandler {
     private PrintWriter out;
     private BufferedReader in;
     private MessageListener listener;
+    @Getter
+    private Player player;
+    @Getter
+    private Socket socket;
 
     public ClientNetworkHandler(String host, int port) {
         connectToServer(host, port);
@@ -22,7 +28,7 @@ public class ClientNetworkHandler {
 
     private void connectToServer(String host, int port) {
         try {
-            Socket socket = new Socket(host, port);
+            socket = new Socket(host, port);
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
@@ -49,11 +55,20 @@ public class ClientNetworkHandler {
     public void sendCommand(Message message) {
         if (out != null) {
             out.println(message.toMessageString());
+            if (player != null)
+                System.out.printf("Отправлено от id=%s: %s%n", player.getId(), message);
         }
     }
 
     public void setMessageListener(MessageListener listener) {
         this.listener = listener;
+    }
+
+    public void initPlayer(int playerID) {
+        Player player = new Player(playerID, 1000, socket);
+        GameProcess.getInstance().initNewPlayer(player);
+        this.player = player;
+
     }
 
     public interface MessageListener {

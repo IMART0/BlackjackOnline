@@ -14,6 +14,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import ru.itis.balckjack.gamelogic.GameProcess;
 import ru.itis.balckjack.gamelogic.model.Player;
 import ru.itis.balckjack.messages.Message;
 import ru.itis.balckjack.messages.MessageParser;
@@ -80,7 +81,9 @@ public class BlackjackFxInterface extends Application {
                 case CONNECTIONACCEPTED:
                     ConnectionAcceptedMessage connectionAcceptedMessage = (ConnectionAcceptedMessage) parsedMessage;
                     int playerID = connectionAcceptedMessage.getCurrentPlayerID();
-                    player = new Player(playerID, 1000, null); // Инициализируем player
+                    networkHandler.initPlayer(playerID);
+                    player = networkHandler.getPlayer(); // Retrieve player from the handler
+
                     if (connectionAcceptedMessage.getOtherPlayerID() != null) {
                         drawMainScene();
                     } else {
@@ -89,7 +92,14 @@ public class BlackjackFxInterface extends Application {
                     break;
                 case BETACCEPTED:
                     BetAcceptedMessage betAcceptedMessage = (BetAcceptedMessage) parsedMessage;
-                    // Обновляем интерфейс в зависимости от принятой ставки
+                    int betPlayerID = betAcceptedMessage.getBetPlayerID();
+                    int amount = betAcceptedMessage.getAmount();
+
+                    // Обновляем баланс и ставку игрока
+                    if (betPlayerID == player.getId()) {
+                        player.setBalance(player.getBalance() - amount);
+                    }
+                    drawBetScene(player.getBalance(), amount, 1000, 0);
                     break;
                 // Добавьте обработку других типов сообщений
             }
@@ -187,7 +197,6 @@ public class BlackjackFxInterface extends Application {
             if (!betValue.isEmpty()) {
                 int bet = Integer.parseInt(betValue);
                 if (bet >= 1 && bet <= player.getBalance()) {
-                    System.out.println("Ставка сделана: " + bet);
                     networkHandler.sendCommand(new BetMessage(player.getId(), bet)); // Отправляем ставку на сервер
 
                     // Показываем всплывающее окно с сообщением "Ставка принята"
@@ -237,7 +246,7 @@ public class BlackjackFxInterface extends Application {
         player1Label.setFont(Font.font("Arial", 16));
         player1Label.setStyle("-fx-text-fill: white;");
 
-        javafx.scene.shape.Circle player1Avatar = new javafx.scene.shape.Circle(40);
+        Circle player1Avatar = new Circle(40);
         player1Avatar.setStyle("-fx-fill: #ffcc00; -fx-stroke: white; -fx-stroke-width: 2;");
 
         // Контейнер для карт первого игрока
@@ -255,7 +264,7 @@ public class BlackjackFxInterface extends Application {
         player2Label.setFont(Font.font("Arial", 16));
         player2Label.setStyle("-fx-text-fill: white;");
 
-        javafx.scene.shape.Circle player2Avatar = new javafx.scene.shape.Circle(40);
+        Circle player2Avatar = new Circle(40);
         player2Avatar.setStyle("-fx-fill: #ffcc00; -fx-stroke: white; -fx-stroke-width: 2;");
 
         // Контейнер для карт второго игрока
@@ -264,6 +273,118 @@ public class BlackjackFxInterface extends Application {
         player2Cards.setStyle("-fx-padding: 10px;");
 
         player2Container.getChildren().addAll(player2Cards, player2Avatar, player2Label);
+
+        // Убираем отступы слева у первого игрока и справа у второго
+        HBox.setMargin(player1Container, new Insets(0, 50, 0, 0)); // Отступ справа 50 пикселей
+        HBox.setMargin(player2Container, new Insets(0, 0, 0, 50)); // Отступ слева 50 пикселей
+
+        // Добавляем игроков в контейнер
+        playersContainer.getChildren().addAll(player1Container, player2Container);
+
+        // Убираем отступы по краям HBox
+        playersContainer.setPadding(new Insets(0)); // Убираем отступы вокруг HBox
+
+        // Добавляем игроков в GridPane (третья строка, занимает 2 колонки)
+        gridPane.add(playersContainer, 0, 2, 2, 1);
+
+        // Основной контейнер
+        VBox mainContainer = new VBox(20, titleLabel, gridPane);
+        mainContainer.setAlignment(Pos.CENTER);
+        mainContainer.setStyle("-fx-background-color: #2C3E50; -fx-padding: 30px;");
+
+        // Устанавливаем сцену
+        globalStage.setScene(new Scene(mainContainer, 800, 600)); // Увеличиваем размер окна
+    }
+
+    private void drawBetScene(int player1Balance, int player1Bet, int player2Balance, int player2Bet) {
+        // Заголовок
+        Label titleLabel = new Label("Blackjack Online");
+        titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 24));
+        titleLabel.setStyle("-fx-text-fill: white;");
+
+        // Создаем GridPane для основного макета
+        GridPane gridPane = new GridPane();
+        gridPane.setAlignment(Pos.CENTER);
+        gridPane.setHgap(100); // Горизонтальное расстояние между колонками
+        gridPane.setVgap(20);  // Вертикальное расстояние между строками
+        gridPane.setPadding(new Insets(20)); // Отступы вокруг GridPane
+
+        // Контейнер для дилера
+        VBox dealerContainer = new VBox(10);
+        dealerContainer.setAlignment(Pos.CENTER);
+
+        Label dealerLabel = new Label("Дилер");
+        dealerLabel.setFont(Font.font("Arial", 16));
+        dealerLabel.setStyle("-fx-text-fill: white;");
+
+        Circle dealerAvatar = new Circle(40);
+        dealerAvatar.setStyle("-fx-fill: #ffcc00; -fx-stroke: white; -fx-stroke-width: 2;");
+
+        // Контейнер для карт дилера
+        HBox dealerCards = new HBox(10);
+        dealerCards.setAlignment(Pos.CENTER);
+        dealerCards.setStyle("-fx-padding: 10px;");
+
+        dealerContainer.getChildren().addAll(dealerLabel, dealerAvatar, dealerCards);
+
+        // Добавляем дилера в GridPane (первая строка, занимает 2 колонки)
+        gridPane.add(dealerContainer, 0, 0, 2, 1);
+
+        // Контейнер для игроков
+        HBox playersContainer = new HBox(); // spacing не задаем
+        playersContainer.setAlignment(Pos.CENTER);
+
+        // Игрок 1
+        VBox player1Container = new VBox(10);
+        player1Container.setAlignment(Pos.CENTER);
+
+        Label player1Label = new Label("Игрок 1");
+        player1Label.setFont(Font.font("Arial", 16));
+        player1Label.setStyle("-fx-text-fill: white;");
+
+        Label player1BalanceLabel = new Label("Баланс: " + player1Balance);
+        player1BalanceLabel.setFont(Font.font("Arial", 14));
+        player1BalanceLabel.setStyle("-fx-text-fill: white;");
+
+        Label player1BetLabel = new Label("Ставка: " + player1Bet);
+        player1BetLabel.setFont(Font.font("Arial", 14));
+        player1BetLabel.setStyle("-fx-text-fill: white;");
+
+        Circle player1Avatar = new Circle(40);
+        player1Avatar.setStyle("-fx-fill: #ffcc00; -fx-stroke: white; -fx-stroke-width: 2;");
+
+        // Контейнер для карт первого игрока
+        HBox player1Cards = new HBox(10);
+        player1Cards.setAlignment(Pos.CENTER);
+        player1Cards.setStyle("-fx-padding: 10px;");
+
+        player1Container.getChildren().addAll(player1Cards, player1Avatar, player1Label, player1BalanceLabel, player1BetLabel);
+
+        // Игрок 2
+        VBox player2Container = new VBox(10);
+        player2Container.setAlignment(Pos.CENTER);
+
+        Label player2Label = new Label("Игрок 2");
+        player2Label.setFont(Font.font("Arial", 16));
+        player2Label.setStyle("-fx-text-fill: white;");
+
+        Label player2BalanceLabel = new Label("Баланс: " + player2Balance);
+        player2BalanceLabel.setFont(Font.font("Arial", 14));
+        player2BalanceLabel.setStyle("-fx-text-fill: white;");
+
+        Label player2BetLabel = new Label("Ставка: " + player2Bet);
+        player2BetLabel.setFont(Font.font("Arial", 14));
+        player2BetLabel.setStyle("-fx-text-fill: white;");
+
+        Circle player2Avatar = new Circle(40);
+        player2Avatar.setStyle("-fx-fill: #ffcc00; -fx-stroke: white; -fx-stroke-width: 2;");
+
+        // Контейнер для карт второго игрока
+        HBox player2Cards = new HBox(10);
+        player2Cards.setAlignment(Pos.CENTER);
+        player2Cards.setStyle("-fx-padding: 10px;");
+
+        player2Container.getChildren().addAll(player2Cards, player2Avatar, player2Label, player2BalanceLabel, player2BetLabel);
 
         // Убираем отступы слева у первого игрока и справа у второго
         HBox.setMargin(player1Container, new Insets(0, 50, 0, 0)); // Отступ справа 50 пикселей

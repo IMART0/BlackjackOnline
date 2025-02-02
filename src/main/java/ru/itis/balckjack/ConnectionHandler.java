@@ -1,13 +1,9 @@
 package ru.itis.balckjack;
 
+import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import ru.itis.balckjack.exceptions.PlayersLimitException;
-import ru.itis.balckjack.gamelogic.States;
-import ru.itis.balckjack.messages.Message;
-import ru.itis.balckjack.messages.clientQuery.BetMessage;
-import ru.itis.balckjack.messages.MessageParser;
-import ru.itis.balckjack.messages.serverAnswer.ConnectionAcceptedMessage;
+import ru.itis.balckjack.gamelogic.model.Player;
 
 import java.io.*;
 import java.net.Socket;
@@ -17,6 +13,8 @@ public class ConnectionHandler implements Runnable {
     private final BlackjackServer server;
     private BufferedReader in;
     private PrintWriter out;
+    @Setter
+    private int playerId;
 
     private final Logger logger = LogManager.getLogger(ConnectionHandler.class);
 
@@ -31,23 +29,6 @@ public class ConnectionHandler implements Runnable {
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             out = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()), true);
             // Этап подключения
-            int clientID = -1;
-            while (server.gameProcess.state() == States.PlayersInit) {
-                if (!server.gameProcess.contains(clientID)) {
-                    if ((clientID = server.gameProcess.initNewPlayer(clientSocket)) != -1) {
-                        if (server.gameProcess.getOtherPlayerID() != -1)
-                            server.broadcast(new ConnectionAcceptedMessage(
-                                    clientID,
-                                    server.gameProcess.getOtherPlayerID()).toMessageString()
-                            );
-                        else
-                            server.broadcast(new ConnectionAcceptedMessage(
-                                    clientID).toMessageString()
-                            );
-                    } else throw new PlayersLimitException();
-                    logger.info("Подключен игрок");
-                }
-            }
 
             String message;
             while ((message = in.readLine()) != null) {
@@ -68,7 +49,7 @@ public class ConnectionHandler implements Runnable {
     public void sendMessage(String message) {
         if (out != null) {
             out.println(message);
-            logger.info("Отправлено клиенту: {}", message);
+            System.out.printf("Отправлено клиенту id=%s: %s%n", playerId, message);
         }
     }
 
@@ -80,5 +61,9 @@ public class ConnectionHandler implements Runnable {
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
+    }
+
+    public Socket getSocket() {
+        return clientSocket;
     }
 }
