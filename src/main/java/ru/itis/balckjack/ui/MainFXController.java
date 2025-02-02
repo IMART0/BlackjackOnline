@@ -151,7 +151,7 @@ public class MainFXController {
 
                     Player targetPlayer = resolvePlayer(bam.getBetPlayerID());
                     targetPlayer.setBet(bam.getAmount());
-                    targetPlayer.setBalance(1000-bam.getAmount());
+                    targetPlayer.setBalance(targetPlayer.getBalance()-bam.getAmount());
                     updateUI();
 
                     break;
