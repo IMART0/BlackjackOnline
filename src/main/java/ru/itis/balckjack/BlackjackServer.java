@@ -8,6 +8,7 @@ import ru.itis.balckjack.gamelogic.model.Player;
 import ru.itis.balckjack.messages.Message;
 import ru.itis.balckjack.messages.MessageParser;
 import ru.itis.balckjack.messages.clientQuery.BetMessage;
+import ru.itis.balckjack.messages.clientQuery.EndMoveMessage;
 import ru.itis.balckjack.messages.clientQuery.RequestCardMessage;
 import ru.itis.balckjack.messages.serverAnswer.*;
 
@@ -110,12 +111,15 @@ public class BlackjackServer implements Runnable {
                 if (gameProcess.placeBet(playerID, amount)) {
                     // Отправляем подтверждение всем игрокам
                     broadcast(new BetAcceptedMessage(playerID, amount).toMessageString());
+                    gameProcess.getPlayer(playerID).setBet(amount);
                     logger.info("Ставка игрока {} принята: {}", playerID, amount);
 
                     // Проверяем, сделали ли оба игрока ставки
                     if (gameProcess.areAllBetsPlaced()) {
                         // Переход к следующему состоянию игры
-                        DealerFirstCardMessage dealerCardMessage = new DealerFirstCardMessage(gameProcess.getCard());
+                        int dealerCardID = gameProcess.getCard();
+                        DealerFirstCardMessage dealerCardMessage = new DealerFirstCardMessage(dealerCardID);
+                        gameProcess.addDealerCard(dealerCardID);
                         broadcast(dealerCardMessage.toMessageString());
                         for (Player player : gameProcess.players()) {
                             broadcast(
@@ -131,11 +135,38 @@ public class BlackjackServer implements Runnable {
                 }
                 break;
             case REQUESTCARD:
-                RequestCardMessage requestCardMessage = (RequestCardMessage) MessageParser.parse(message);
+                RequestCardMessage requestCardMessage = (RequestCardMessage) parsedMessage;
                 broadcast(new ReceivedCardMessage(
                         requestCardMessage.getPlayerID(),
                         gameProcess.getCard()
                 ).toMessageString());
+                break;
+            case ENDMOVE:
+                EndMoveMessage endMoveMessage = (EndMoveMessage) parsedMessage;
+                gameProcess.playerFinished(endMoveMessage.getPlayerID());
+                if (gameProcess.areAllPlayersMoved()) {
+                    while (gameProcess.dealerScore() <= 17) {
+                        int cardID = gameProcess.getCard();
+                        DealerCardMessage dealerCardMessage = new DealerCardMessage(cardID);
+                        gameProcess.addDealerCard(cardID);
+                        broadcast(dealerCardMessage.toMessageString());
+                    }
+
+                    for (Player player : gameProcess.players()) {
+                        if (player.score() < gameProcess.dealerScore()) {
+                            player.reduceBalance();
+                            LooserMessage looserMessage = new LooserMessage(player.getId(), player.getBalance());
+                            broadcast(looserMessage.toMessageString());
+                        } else if (player.score() > gameProcess.dealerScore()) {
+                            player.increaseBalance();
+                            WinnerMessage winnerMessage = new WinnerMessage(player.getId(), player.getBalance());
+                            broadcast(winnerMessage.toMessageString());
+                        } else {
+                            WinnerMessage winnerMessage = new WinnerMessage(player.getId(), player.getBalance());
+                            broadcast(winnerMessage.toMessageString());
+                        }
+                    }
+                }
         }
     }
 }
