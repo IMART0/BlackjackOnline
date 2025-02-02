@@ -120,6 +120,11 @@ public class MainFXController {
                     BetAcceptedMessage bam = (BetAcceptedMessage) parsedMessage;
                     if (bam.getBetPlayerID() == player.getId()) {
                         betBox.setVisible(false);
+                        if (player.getId() == 0) {
+                            player1Cards.setOpacity(1.);
+                        } else {
+                            player2Cards.setOpacity(1.);
+                        }
                     }
                     break;
                 case RECEIVEDCARD:
@@ -190,8 +195,6 @@ public class MainFXController {
             player1Cards.getChildren().add(cardImage);
         } else if (playerId == 1) {
             player2Cards.getChildren().add(cardImage);
-        } else if (playerId == -1) { // ID дилера
-            dealerCards.getChildren().add(cardImage);
         }
     }
 
