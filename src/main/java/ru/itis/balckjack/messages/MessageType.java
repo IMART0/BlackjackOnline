@@ -15,7 +15,8 @@ public enum MessageType {
     DEALERCARD(8), // <cardID> //Дилер в конце выдает себе карты, пока не станет больше 17
     WINNER(9), // <playerID> <balance> //для каждого победившего игрока просчитывается его баланс, и что он победил (посылается всем)
     NEWGAME(10), //Новая игра
-    LOOSER(11);
+    LOOSER(11),
+    NEWGAMEREQUEST(12);
 
     private final int id;
 

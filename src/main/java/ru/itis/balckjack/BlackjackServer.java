@@ -9,6 +9,7 @@ import ru.itis.balckjack.messages.Message;
 import ru.itis.balckjack.messages.MessageParser;
 import ru.itis.balckjack.messages.clientQuery.BetMessage;
 import ru.itis.balckjack.messages.clientQuery.EndMoveMessage;
+import ru.itis.balckjack.messages.clientQuery.NewGameRequestMessage;
 import ru.itis.balckjack.messages.clientQuery.RequestCardMessage;
 import ru.itis.balckjack.messages.serverAnswer.*;
 
@@ -172,6 +173,15 @@ public class BlackjackServer implements Runnable {
                             broadcast(winnerMessage.toMessageString());
                         }
                     }
+                }
+            }
+            case NEWGAMEREQUEST -> {
+                NewGameRequestMessage newGameRequestMessage = (NewGameRequestMessage) parsedMessage;
+                gameProcess.reset();
+                gameProcess.playerFinished(newGameRequestMessage.getPlayerID());
+                if (gameProcess.areAllPlayersMoved()) {
+                    gameProcess.reset();
+                    broadcast(new NewGameMessage().toMessageString());
                 }
             }
         }

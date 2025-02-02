@@ -2,10 +2,7 @@ package ru.itis.balckjack.messages;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import ru.itis.balckjack.messages.clientQuery.BetMessage;
-import ru.itis.balckjack.messages.clientQuery.ConnectedMessage;
-import ru.itis.balckjack.messages.clientQuery.EndMoveMessage;
-import ru.itis.balckjack.messages.clientQuery.RequestCardMessage;
+import ru.itis.balckjack.messages.clientQuery.*;
 import ru.itis.balckjack.messages.serverAnswer.*;
 
 import java.util.HashMap;
@@ -135,6 +132,14 @@ public class MessageParser {
                 }
             }
             case NEWGAME -> new NewGameMessage();
+            case NEWGAMEREQUEST -> {
+                try {
+                    int playerID = Integer.parseInt(attributes.get("playerID"));
+                    yield new NewGameRequestMessage(playerID);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid number format in BET message: " + rawMessage, e);
+                }
+            }
             case LOOSER -> {
                 try {
                     int playerID = Integer.parseInt(attributes.get("playerID"));

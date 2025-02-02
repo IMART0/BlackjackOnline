@@ -10,7 +10,7 @@ public class GameProcess {
     private final ArrayList<Player> players;
     private List<Boolean> playersFinished;
     private List<Integer> dealerCardsID;
-    private final Deck deck;
+    private Deck deck;
 
     public boolean areAllPlayersMoved() {
         for (Boolean playerFinished : playersFinished) {
@@ -62,6 +62,15 @@ public class GameProcess {
         playersFinished = new ArrayList<>();
         deck = new Deck();
         dealerCardsID = new ArrayList<>();
+    }
+
+    public void reset() {
+        playersFinished = new ArrayList<>();
+        deck = new Deck();
+        dealerCardsID = new ArrayList<>();
+        for (Player player : players) {
+            player.setBet(null);
+        }
     }
 
     public boolean isGameFinished() {
