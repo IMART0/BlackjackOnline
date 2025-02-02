@@ -59,6 +59,7 @@ public class GameProcess {
 
     private GameProcess() {
         players = new ArrayList<>();
+        playersFinished = new ArrayList<>();
         deck = new Deck();
         dealerCardsID = new ArrayList<>();
     }
