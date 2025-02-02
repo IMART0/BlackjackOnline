@@ -83,7 +83,7 @@ public class BlackjackServer implements Runnable {
     public void handleMessage(String message, ConnectionHandler handler) throws PlayersLimitException {
         Message parsedMessage = MessageParser.parse(message);
         switch (parsedMessage.getType()) {
-            case CONNECTED:
+            case CONNECTED -> {
                 ConnectionAcceptedMessage connectionAcceptedMessage;
                 if (gameProcess.playersCount() <= 2) {
                     Player player = new Player(
@@ -96,13 +96,13 @@ public class BlackjackServer implements Runnable {
                     if (gameProcess.playersCount() == 1)
                         connectionAcceptedMessage = new ConnectionAcceptedMessage(0);
                     else
-                        connectionAcceptedMessage = new ConnectionAcceptedMessage(1,0);
+                        connectionAcceptedMessage = new ConnectionAcceptedMessage(1, 0);
                 } else throw new PlayersLimitException();
                 broadcast(connectionAcceptedMessage.toMessageString());
                 logger.info("Подключен игрок");
-                break;
+            }
 
-            case BET:
+            case BET -> {
                 BetMessage betMessage = (BetMessage) parsedMessage;
                 int playerID = betMessage.getPlayerID();
                 int amount = betMessage.getAmount();
@@ -122,26 +122,32 @@ public class BlackjackServer implements Runnable {
                         gameProcess.addDealerCard(dealerCardID);
                         broadcast(dealerCardMessage.toMessageString());
                         for (Player player : gameProcess.players()) {
+                            int cardID = gameProcess.getCard();
+                            player.addCard(cardID);
                             broadcast(
-                                    new ReceivedCardMessage(player.getId(), gameProcess.getCard()).toMessageString()
+                                    new ReceivedCardMessage(player.getId(), cardID).toMessageString()
                             );
+                            cardID = gameProcess.getCard();
+                            player.addCard(cardID);
                             broadcast(
-                                    new ReceivedCardMessage(player.getId(), gameProcess.getCard()).toMessageString()
+                                    new ReceivedCardMessage(player.getId(), cardID).toMessageString()
                             );
                         }
                     }
                 } else {
                     handler.sendMessage("Ошибка: недостаточно средств или неверный ID игрока");
                 }
-                break;
-            case REQUESTCARD:
+            }
+            case REQUESTCARD -> {
                 RequestCardMessage requestCardMessage = (RequestCardMessage) parsedMessage;
+                int cardID = gameProcess.getCard();
+                gameProcess.getPlayer(requestCardMessage.getPlayerID()).addCard(cardID);
                 broadcast(new ReceivedCardMessage(
                         requestCardMessage.getPlayerID(),
-                        gameProcess.getCard()
+                        cardID
                 ).toMessageString());
-                break;
-            case ENDMOVE:
+            }
+            case ENDMOVE -> {
                 EndMoveMessage endMoveMessage = (EndMoveMessage) parsedMessage;
                 gameProcess.playerFinished(endMoveMessage.getPlayerID());
                 if (gameProcess.areAllPlayersMoved()) {
@@ -167,6 +173,7 @@ public class BlackjackServer implements Runnable {
                         }
                     }
                 }
+            }
         }
     }
 }
