@@ -84,7 +84,7 @@ public class MessageParser {
                     throw new IllegalArgumentException("Invalid number format in BET message: " + rawMessage, e);
                 }
             }
-            case DEALLERFIRSTCARD -> {
+            case DEALERFIRSTCARD -> {
                 try {
                     int cardID = Integer.parseInt(attributes.get("cardID"));
                     yield new DealerFirstCardMessage(cardID);
@@ -117,7 +117,7 @@ public class MessageParser {
                     throw new IllegalArgumentException();
                 }
             }
-            case DEALLERCARD -> {
+            case DEALERCARD -> {
                 try {
                     int cardID = Integer.parseInt(attributes.get("cardID"));
                     yield new DealerCardMessage(cardID);

@@ -1,13 +1,15 @@
 package ru.itis.balckjack.messages.serverAnswer;
 
+import lombok.Getter;
 import ru.itis.balckjack.messages.Message;
 import ru.itis.balckjack.messages.MessageType;
 
+@Getter
 public class DealerFirstCardMessage extends Message {
     private final int cardID;
 
     public DealerFirstCardMessage(int cardID) {
-        super(MessageType.DEALLERFIRSTCARD);
+        super(MessageType.DEALERFIRSTCARD);
         this.cardID = cardID;
     }
 
