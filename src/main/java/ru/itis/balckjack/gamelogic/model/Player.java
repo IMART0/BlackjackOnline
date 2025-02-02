@@ -21,6 +21,7 @@ public class Player {
         this.id = id;
         this.balance = balance;
         this.socket = socket;
+        hand = new ArrayList<>();
     }
 
     public int score() {
@@ -45,6 +46,10 @@ public class Player {
         }
 
         return score;
+    }
+
+    public void addCard(int cardID) {
+        hand.add(cardID);
     }
 
     public void reduceBalance() {
