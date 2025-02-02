@@ -8,8 +8,7 @@ import ru.itis.balckjack.gamelogic.model.Player;
 import ru.itis.balckjack.messages.Message;
 import ru.itis.balckjack.messages.MessageParser;
 import ru.itis.balckjack.messages.clientQuery.BetMessage;
-import ru.itis.balckjack.messages.serverAnswer.BetAcceptedMessage;
-import ru.itis.balckjack.messages.serverAnswer.ConnectionAcceptedMessage;
+import ru.itis.balckjack.messages.serverAnswer.*;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -115,7 +114,13 @@ public class BlackjackServer implements Runnable {
                     // Проверяем, сделали ли оба игрока ставки
                     if (gameProcess.areAllBetsPlaced()) {
                         // Переход к следующему состоянию игры
-                        broadcast("Игра начинается!");
+                        DealerFirstCardMessage dealerCardMessage = new DealerFirstCardMessage(gameProcess.getCard());
+                        broadcast(dealerCardMessage.toMessageString());
+                        for (Player player : gameProcess.players()) {
+                            broadcast(
+                                    new ReceivedCardMessage(player.getId(), gameProcess.getCard()).toMessageString()
+                            );
+                        }
                     }
                 } else {
                     // Отправляем сообщение об ошибке

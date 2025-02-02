@@ -15,6 +15,6 @@ public class DealerCardMessage extends Message {
 
     @Override
     public String toMessageString() {
-        return "type:9;attributes:{cardID:%s}".formatted(cardID);
+        return "type:%s;attributes:{cardID:%s}".formatted(getType().getId(), cardID);
     }
 }

@@ -19,7 +19,7 @@ public class ReceivedCardMessage extends Message {
 
     @Override
     public String toMessageString() {
-        return "type:5;attributes:{playerID:%s;cardID:%s}".formatted(playerID, cardID);
+        return "type:%s;attributes:{playerID:%s;cardID:%s}".formatted(getType().getId(), playerID, cardID);
     }
 
 }

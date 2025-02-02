@@ -15,7 +15,7 @@ public class RequestCardMessage extends Message {
 
     @Override
     public String toMessageString() {
-        return "type:7;attributes:{playerID:%s}".formatted(playerID);
+        return "type:%s;attributes:{playerID:%s}".formatted(getType().getId(), playerID);
     }
 
 }

@@ -16,7 +16,8 @@ public class WinnerMessage extends Message {
 
     @Override
     public String toMessageString() {
-        return "type:10;attributes:{playerID:%s;balance:%s}".formatted(
+        return "type:%s;attributes:{playerID:%s;balance:%s}".formatted(
+                getType().getId(),
                 playerID,
                 balance
         );

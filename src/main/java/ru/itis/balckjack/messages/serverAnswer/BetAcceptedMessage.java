@@ -18,7 +18,8 @@ public class BetAcceptedMessage extends Message {
 
     @Override
     public String toMessageString() {
-        return "type:3;attributes:{betPlayerID:%s;amount:%s}".formatted(
+        return "type:%s;attributes:{betPlayerID:%s;amount:%s}".formatted(
+                getType().getId(),
                 betPlayerID,
                 amount
         );

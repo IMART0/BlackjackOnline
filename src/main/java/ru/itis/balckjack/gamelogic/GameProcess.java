@@ -1,12 +1,15 @@
 package ru.itis.balckjack.gamelogic;
 
+import ru.itis.balckjack.gamelogic.model.Deck;
 import ru.itis.balckjack.gamelogic.model.Player;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class GameProcess {
-    private static boolean isGameFinished = false;
+    private boolean isGameFinished = false;
     private ArrayList<Player> players;
+    private Deck deck;
     private static GameProcess gameProcess;
 
     public static GameProcess getInstance() {
@@ -22,9 +25,10 @@ public class GameProcess {
 
     private GameProcess() {
         players = new ArrayList<>();
+        deck = new Deck();
     }
 
-    public static boolean isGameFinished() {
+    public boolean isGameFinished() {
         return isGameFinished;
     }
 
@@ -44,7 +48,7 @@ public class GameProcess {
             player.setBet(amount);
             return true;
         }
-        return false; // Недостаточно средств
+        return false;
     }
 
     public boolean areAllBetsPlaced() {
@@ -57,5 +61,13 @@ public class GameProcess {
 
     public Player getPlayer(int playerID) {
         return players.get(playerID);
+    }
+
+    public int getCard() {
+        return deck.drawCard();
+    }
+
+    public List<Player> players() {
+        return players;
     }
 }
