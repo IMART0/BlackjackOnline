@@ -16,10 +16,7 @@ import ru.itis.balckjack.gamelogic.GameProcess;
 import ru.itis.balckjack.gamelogic.model.Player;
 import ru.itis.balckjack.messages.Message;
 import ru.itis.balckjack.messages.MessageParser;
-import ru.itis.balckjack.messages.clientQuery.BetMessage;
-import ru.itis.balckjack.messages.clientQuery.ConnectedMessage;
-import ru.itis.balckjack.messages.clientQuery.EndMoveMessage;
-import ru.itis.balckjack.messages.clientQuery.RequestCardMessage;
+import ru.itis.balckjack.messages.clientQuery.*;
 import ru.itis.balckjack.messages.serverAnswer.*;
 
 import java.io.IOException;
@@ -29,6 +26,7 @@ public class MainFXController {
     private ClientNetworkHandler networkHandler;
     private Player currentPlayer;
     private Player otherPlayer;
+    private ArrayList<Integer> dealerHand = new ArrayList<>();
 
     private boolean currentPlayerReady = false;
     private boolean otherPlayerReady = false;
@@ -170,8 +168,87 @@ public class MainFXController {
                     DealerCardMessage dcm = (DealerCardMessage) parsedMessage;
                     handleDealerCard(dcm.getCardID());
                     break;
+
+                case WINNER:
+                    WinnerMessage wm = (WinnerMessage) parsedMessage;
+                    handleWinner(wm.getPlayerID(), wm.getBalance());
+                    break;
+
+                case LOOSER:
+                    LooserMessage lm = (LooserMessage) parsedMessage;
+                    handleLoser(lm.getPlayerID(), lm.getBalance());
+                    break;
+
+                case NEWGAME:
+                    resetGame();
+                    break;
             }
         });
+    }
+
+    private void handleWinner(int playerId, int newBalance) {
+        if (playerId == currentPlayer.getId()) {
+            currentPlayer.setBalance(newBalance);
+            showGameResultDialog(true, currentPlayer.score(), calculateDealerScore());
+        }
+        updateUI();
+    }
+
+    private void handleLoser(int playerId, int newBalance) {
+        if (playerId == currentPlayer.getId()) {
+            currentPlayer.setBalance(newBalance);
+            showGameResultDialog(false, currentPlayer.score(), calculateDealerScore());
+        }
+        updateUI();
+    }
+
+    private int calculateDealerScore() {
+        return dealerHand.stream()
+                .mapToInt(cardId -> {
+                    int rank = (cardId / 4) + 2;
+                    if (rank >= 11 && rank <= 13) return 10;
+                    if (rank == 14) return 11;
+                    return rank;
+                })
+                .sum();
+    }
+
+    private void showGameResultDialog(boolean isWin, int playerScore, int dealerScore) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(isWin ? "Победа!" : "Поражение");
+        alert.setHeaderText(null);
+        alert.setContentText(String.format("%s%nВаши очки: %d%nОчки дилера: %d",
+                isWin ? "ТЫ ПОБЕДИЛ!!!" : "Ты проиграл, повезет в следующий раз!",
+                playerScore,
+                dealerScore
+        ));
+
+        ButtonType confirmButton = new ButtonType("Новая игра", ButtonBar.ButtonData.OK_DONE);
+        alert.getButtonTypes().setAll(confirmButton);
+
+        alert.showAndWait().ifPresent(buttonType -> {
+            networkHandler.sendCommand(new NewGameRequestMessage(currentPlayer.getId()));
+        });
+    }
+
+    private void resetGame() {
+        // Сброс состояния игры
+        currentPlayer.getHand().clear();
+        otherPlayer.getHand().clear();
+        dealerHand.clear();
+
+        player1Cards.getChildren().clear();
+        player2Cards.getChildren().clear();
+        dealerCards.getChildren().clear();
+
+        currentPlayer.setBet(null);
+        otherPlayer.setBet(null);
+
+        betField.setDisable(false);
+        betButton.setDisable(false);
+        actionButtonsBox.setVisible(false);
+
+        updateUI();
     }
 
     private void handleDealerFirstCard(int cardId) {
@@ -202,6 +279,7 @@ public class MainFXController {
     }
 
     private void addDealerCard(int cardId) {
+        dealerHand.add(cardId);
         String imagePath = convertCardIdToImagePath(cardId);
         ImageView cardImage = new ImageView(new Image(getClass().getResourceAsStream(imagePath)));
         cardImage.setFitWidth(60);

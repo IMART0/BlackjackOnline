@@ -9,7 +9,7 @@ public class NewGameRequestMessage extends Message {
     private final int playerID;
 
     public NewGameRequestMessage(int playerID) {
-        super(MessageType.NEWGAME);
+        super(MessageType.NEWGAMEREQUEST);
         this.playerID = playerID;
     }
 
