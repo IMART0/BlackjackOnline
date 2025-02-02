@@ -90,6 +90,7 @@ public class MainFXController {
             controller.setPrimaryStage(primaryStage);
             controller.setNetworkHandler(networkHandler);
             controller.setPlayer(player);
+            networkHandler.setMessageListener(controller::handleServerMessage);
 
             primaryStage.setScene(new Scene(root, 680, 510));
         } catch (IOException e) {
