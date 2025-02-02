@@ -8,6 +8,7 @@ import ru.itis.balckjack.gamelogic.model.Player;
 import ru.itis.balckjack.messages.Message;
 import ru.itis.balckjack.messages.MessageParser;
 import ru.itis.balckjack.messages.clientQuery.BetMessage;
+import ru.itis.balckjack.messages.clientQuery.RequestCardMessage;
 import ru.itis.balckjack.messages.serverAnswer.*;
 
 import java.io.IOException;
@@ -120,14 +121,21 @@ public class BlackjackServer implements Runnable {
                             broadcast(
                                     new ReceivedCardMessage(player.getId(), gameProcess.getCard()).toMessageString()
                             );
+                            broadcast(
+                                    new ReceivedCardMessage(player.getId(), gameProcess.getCard()).toMessageString()
+                            );
                         }
                     }
                 } else {
-                    // Отправляем сообщение об ошибке
                     handler.sendMessage("Ошибка: недостаточно средств или неверный ID игрока");
                 }
                 break;
-            // Добавьте обработку других типов сообщений
+            case REQUESTCARD:
+                RequestCardMessage requestCardMessage = (RequestCardMessage) MessageParser.parse(message);
+                broadcast(new ReceivedCardMessage(
+                        requestCardMessage.getPlayerID(),
+                        gameProcess.getCard()
+                ).toMessageString());
         }
     }
 }
