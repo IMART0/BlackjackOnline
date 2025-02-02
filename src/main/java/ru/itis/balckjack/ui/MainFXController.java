@@ -80,7 +80,7 @@ public class MainFXController {
 
     @FXML
     private void handleConnect() {
-        networkHandler = new ClientNetworkHandler("localhost", 12345);
+        networkHandler = new ClientNetworkHandler("194.67.84.100", 12345);
         networkHandler.setMessageListener(this::handleServerMessage);
         networkHandler.sendCommand(new ConnectedMessage());
     }
@@ -253,6 +253,9 @@ public class MainFXController {
         currentPlayer.getHand().clear();
         otherPlayer.getHand().clear();
         dealerHand.clear();
+
+        currentPlayerReady = false;
+        otherPlayerReady = false;
 
         player1Cards.getChildren().clear();
         player2Cards.getChildren().clear();
