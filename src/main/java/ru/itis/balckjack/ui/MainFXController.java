@@ -190,6 +190,8 @@ public class MainFXController {
         if (playerId == currentPlayer.getId()) {
             currentPlayer.setBalance(newBalance);
             showGameResultDialog(true, currentPlayer.score(), calculateDealerScore());
+        } else {
+            otherPlayer.setBalance(newBalance);
         }
         updateUI();
     }
@@ -198,6 +200,8 @@ public class MainFXController {
         if (playerId == currentPlayer.getId()) {
             currentPlayer.setBalance(newBalance);
             showGameResultDialog(false, currentPlayer.score(), calculateDealerScore());
+        } else {
+            otherPlayer.setBalance(newBalance);
         }
         updateUI();
     }
@@ -247,6 +251,8 @@ public class MainFXController {
         betField.setDisable(false);
         betButton.setDisable(false);
         actionButtonsBox.setVisible(false);
+
+        betBox.setVisible(true);
 
         updateUI();
     }
