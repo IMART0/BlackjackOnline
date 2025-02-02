@@ -10,7 +10,7 @@ public class LooserMessage extends Message {
     private final int balance;
 
     public LooserMessage(int playerID, int balance) {
-        super(MessageType.WINNER);
+        super(MessageType.LOOSER);
         this.playerID = playerID;
         this.balance = balance;
     }

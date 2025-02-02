@@ -164,7 +164,7 @@ public class BlackjackServer implements Runnable {
                             player.reduceBalance();
                             LooserMessage looserMessage = new LooserMessage(player.getId(), player.getBalance());
                             broadcast(looserMessage.toMessageString());
-                        } else if (player.score() >= gameProcess.dealerScore()) {
+                        } else if (player.score() >= gameProcess.dealerScore() && player.score() <= 21) {
                             player.increaseBalance();
                             WinnerMessage winnerMessage = new WinnerMessage(player.getId(), player.getBalance());
                             broadcast(winnerMessage.toMessageString());
@@ -178,9 +178,10 @@ public class BlackjackServer implements Runnable {
             case NEWGAMEREQUEST -> {
                 NewGameRequestMessage newGameRequestMessage = (NewGameRequestMessage) parsedMessage;
                 gameProcess.reset();
-                gameProcess.playerFinished(newGameRequestMessage.getPlayerID());
-                if (gameProcess.areAllPlayersMoved()) {
+                gameProcess.playerRequestNewGame(newGameRequestMessage.getPlayerID());
+                if (gameProcess.allPlayersReady()) {
                     gameProcess.reset();
+                    gameProcess.clearRequests();
                     broadcast(new NewGameMessage().toMessageString());
                 }
             }

@@ -55,7 +55,8 @@ public class Player {
     public void reduceBalance() {
         balance -= bet;
     }
+
     public void increaseBalance() {
-        balance += bet;
+        balance += bet * 2;
     }
 }
