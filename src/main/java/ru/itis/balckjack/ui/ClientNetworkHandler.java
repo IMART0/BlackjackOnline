@@ -55,8 +55,7 @@ public class ClientNetworkHandler {
     public void sendCommand(Message message) {
         if (out != null) {
             out.println(message.toMessageString());
-            if (player != null)
-                System.out.printf("Отправлено от id=%s: %s%n", player.getId(), message);
+            System.out.printf("Отправлено: %s%n", message);
         }
     }
 
