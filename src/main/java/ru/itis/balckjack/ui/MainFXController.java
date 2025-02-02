@@ -150,8 +150,6 @@ public class MainFXController {
                         otherPlayerReady = true;
                     }
                     if (currentPlayerReady && otherPlayerReady) actionButtonsBox.setVisible(true);
-                    System.out.print(currentPlayerReady);
-                    System.out.println(otherPlayerReady);
 
                     Player targetPlayer = resolvePlayer(bam.getBetPlayerID());
                     targetPlayer.setBet(bam.getAmount());
@@ -227,8 +225,14 @@ public class MainFXController {
 
         // Добавляем в соответствующий HBox
         if (playerId == 0) {
+            if (!player1Cards.getChildren().isEmpty()) {
+                cardImage.getStyleClass().add("card-overlap");
+            }
             player1Cards.getChildren().add(cardImage);
         } else if (playerId == 1) {
+            if (!player2Cards.getChildren().isEmpty()) {
+                cardImage.getStyleClass().add("card-overlap");
+            }
             player2Cards.getChildren().add(cardImage);
         }
 
@@ -269,7 +273,9 @@ public class MainFXController {
             controller.setPlayers(currentPlayer, otherPlayer);
             networkHandler.setMessageListener(controller::handleServerMessage);
 
-            primaryStage.setScene(new Scene(root, 680, 510));
+            Scene scene = new Scene(root, 800, 600);
+            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+            primaryStage.setScene(scene);
         } catch (IOException e) {
             e.printStackTrace();
         }

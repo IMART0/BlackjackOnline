@@ -14,32 +14,32 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane centerShape="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="510.0" prefWidth="680.0" scaleShape="false" style="-fx-background-color: #2C3E50;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.itis.balckjack.ui.MainFXController">
+<AnchorPane centerShape="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="600.0" prefWidth="800.0" scaleShape="false" style="-fx-background-color: #2C3E50;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.itis.balckjack.ui.MainFXController">
    <children>
-      <ImageView fitHeight="313.0" fitWidth="560.0" layoutX="60.0" layoutY="143.0" pickOnBounds="true" preserveRatio="true">
+      <ImageView fitHeight="313.0" fitWidth="560.0" layoutX="120.0" layoutY="158.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@images/table2.png" />
          </image>
       </ImageView>
    
-                <Label layoutX="251.0" layoutY="1.0" style="-fx-text-fill: white;" text="Blackjack Online">
+                <Label layoutX="313.0" layoutY="14.0" style="-fx-text-fill: white;" text="Blackjack Online">
            <font>
                <Font name="Arial" size="24" />
            </font>
        </Label>
 
               <!-- Dealer Section -->
-        <VBox alignment="CENTER" layoutX="139.0" layoutY="28.0" prefHeight="217.0" prefWidth="403.0" spacing="10">
+        <VBox alignment="CENTER" layoutX="200.0" layoutY="50.0" prefHeight="217.0" prefWidth="403.0" spacing="10">
             <Label style="-fx-text-fill: white;" text="Дилер">
                 <font>
                     <Font name="Arial" size="16" />
                 </font>
             </Label>
             <Circle radius="40" style="-fx-fill: #ffcc00; -fx-stroke: white; -fx-stroke-width: 2;" />
-            <HBox fx:id="dealerCards" alignment="CENTER" prefHeight="125.0" prefWidth="82.0" spacing="10" style="-fx-padding: 10px;" />
+            <HBox fx:id="dealerCards" alignment="CENTER" prefHeight="125.0" prefWidth="82.0" spacing="4.0" style="-fx-padding: 10px;" />
         </VBox>
-         <VBox alignment="CENTER" layoutY="272.0" prefHeight="226.0" prefWidth="340.0" spacing="10">
-             <HBox fx:id="player1Cards" alignment="CENTER" opacity="0.5" prefHeight="104.0" prefWidth="116.0" spacing="10" style="-fx-padding: 10px;" />
+         <VBox alignment="CENTER" layoutY="245.0" prefHeight="226.0" prefWidth="403.0" spacing="10">
+             <HBox fx:id="player1Cards" alignment="CENTER" opacity="0.5" prefHeight="104.0" prefWidth="116.0" spacing="4.0" style="-fx-padding: 10px;" />
              <Circle radius="40" style="-fx-fill: #ffcc00; -fx-stroke: white; -fx-stroke-width: 2;" />
              <Label style="-fx-text-fill: white;" text="Игрок 1">
                  <font>
@@ -47,8 +47,8 @@
                  </font>
              </Label>
          </VBox>
-         <VBox alignment="CENTER" layoutX="340.0" layoutY="273.0" prefHeight="226.0" prefWidth="340.0" spacing="10">
-             <HBox fx:id="player2Cards" alignment="CENTER" opacity="0.5" prefHeight="229.0" prefWidth="82.0" spacing="10" style="-fx-padding: 10px;" />
+         <VBox alignment="CENTER" layoutX="397.0" layoutY="245.0" prefHeight="226.0" prefWidth="403.0" spacing="10">
+             <HBox fx:id="player2Cards" alignment="CENTER" opacity="0.5" prefHeight="229.0" prefWidth="82.0" spacing="4.0" style="-fx-padding: 10px;" />
              <Circle radius="40" style="-fx-fill: #ffcc00; -fx-stroke: white; -fx-stroke-width: 2;" />
              <Label style="-fx-text-fill: white;" text="Игрок 2">
                  <font>
@@ -71,7 +71,7 @@
             <Insets />
          </opaqueInsets>
       </VBox>
-      <VBox fx:id="player1BalanceBox" layoutY="310.0" prefHeight="200.0" prefWidth="129.0" style="-fx-padding: 0px 4px;">
+      <VBox fx:id="player1BalanceBox" layoutY="399.0" prefHeight="200.0" prefWidth="129.0" style="-fx-padding: 0px 4px;">
          <children>
             <Label text="Оставшийся баланс:" textFill="WHITE" wrapText="true">
                <font>
@@ -108,7 +108,7 @@
             <Insets />
          </opaqueInsets>
       </VBox>
-      <VBox fx:id="player2BalanceBox" layoutX="551.0" layoutY="310.0" prefHeight="200.0" prefWidth="129.0" style="-fx-padding: 0px 4px;">
+      <VBox fx:id="player2BalanceBox" layoutX="671.0" layoutY="399.0" prefHeight="200.0" prefWidth="129.0" style="-fx-padding: 0px 4px;">
          <children>
             <Label text="Оставшийся баланс:" textAlignment="RIGHT" textFill="WHITE" wrapText="true">
                <font>
@@ -145,11 +145,11 @@
             <Insets />
          </opaqueInsets>
       </VBox>
-      <StackPane fx:id="betBox" layoutX="241.0" layoutY="210.0" prefHeight="150.0" prefWidth="200.0">
+      <StackPane fx:id="betBox" layoutX="300.0" layoutY="208.0" prefHeight="150.0" prefWidth="200.0">
          <children>
             <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#2c3e50" height="150.0" opacity="0.8" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="200.0" />
       
-                    <!-- Bet Controls -->
+                                   <!-- Bet Controls -->
               <VBox alignment="CENTER" spacing="10" style="-fx-background-radius: 10px;">
                   <Label fx:id="betLabel" style="-fx-text-fill: white;" text="Введите ставку (1-1000):">
                       <font>
