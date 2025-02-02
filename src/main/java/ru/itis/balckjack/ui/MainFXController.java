@@ -207,14 +207,27 @@ public class MainFXController {
     }
 
     private int calculateDealerScore() {
-        return dealerHand.stream()
-                .mapToInt(cardId -> {
-                    int rank = (cardId / 4) + 2;
-                    if (rank >= 11 && rank <= 13) return 10;
-                    if (rank == 14) return 11;
-                    return rank;
-                })
-                .sum();
+        int score = 0;
+        int aces = 0;
+        for (int cardID : dealerHand) {
+            int rank = (cardID / 4) + 2; // Получаем номинал карты (2-14, где 14 - туз)
+
+            if (rank >= 2 && rank <= 10) {
+                score += rank;
+            } else if (rank >= 11 && rank <= 13) { // Валет, дама, король
+                score += 10;
+            } else { // Туз (rank == 14)
+                aces++;
+                score += 11;
+            }
+        }
+        // Корректируем тузы, если перебор
+        while (score > 21 && aces > 0) {
+            score -= 10;
+            aces--;
+        }
+
+        return score;
     }
 
     private void showGameResultDialog(boolean isWin, int playerScore, int dealerScore) {

@@ -59,4 +59,8 @@ public class Player {
     public void increaseBalance() {
         balance += bet * 2;
     }
+
+    public void saveBalance() {
+        balance += bet;
+    }
 }

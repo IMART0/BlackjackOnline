@@ -159,13 +159,24 @@ public class BlackjackServer implements Runnable {
                         broadcast(dealerCardMessage.toMessageString());
                     }
 
+                    System.out.println(gameProcess.dealerScore());
                     for (Player player : gameProcess.players()) {
-                        if (player.score() < gameProcess.dealerScore()) {
-                            player.reduceBalance();
+                        if (player.score() > 21) {
                             LooserMessage looserMessage = new LooserMessage(player.getId(), player.getBalance());
                             broadcast(looserMessage.toMessageString());
-                        } else if (player.score() >= gameProcess.dealerScore() && player.score() <= 21) {
+                        }
+                        else if (gameProcess.dealerScore() > 21) {
                             player.increaseBalance();
+                            WinnerMessage winnerMessage = new WinnerMessage(player.getId(), player.getBalance());
+                            broadcast(winnerMessage.toMessageString());
+                        }
+                        else if (player.score() > gameProcess.dealerScore()) {
+                            player.increaseBalance();
+                            WinnerMessage winnerMessage = new WinnerMessage(player.getId(), player.getBalance());
+                            broadcast(winnerMessage.toMessageString());
+                        }
+                        else if (player.score() == gameProcess.dealerScore()) {
+                            player.saveBalance();
                             WinnerMessage winnerMessage = new WinnerMessage(player.getId(), player.getBalance());
                             broadcast(winnerMessage.toMessageString());
                         } else {

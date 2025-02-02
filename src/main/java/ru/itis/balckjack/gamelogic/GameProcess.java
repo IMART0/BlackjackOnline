@@ -89,6 +89,7 @@ public class GameProcess {
         dealerCardsID = new ArrayList<>();
         for (Player player : players) {
             player.setBet(null);
+            player.setHand(new ArrayList<>());
         }
     }
 
