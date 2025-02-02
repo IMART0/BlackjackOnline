@@ -8,13 +8,23 @@ import java.util.List;
 
 public class GameProcess {
     private final ArrayList<Player> players;
-    private List<Boolean> playersFinished;
+    private final List<Boolean> playersFinished;
+    private final List<Boolean> newGameRequest;
     private List<Integer> dealerCardsID;
     private Deck deck;
 
     public boolean areAllPlayersMoved() {
         for (Boolean playerFinished : playersFinished) {
             if (!playerFinished) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean allPlayersReady() {
+        for (Boolean newGameRequest : newGameRequest) {
+            if (!newGameRequest) {
                 return false;
             }
         }
@@ -49,6 +59,12 @@ public class GameProcess {
         dealerCardsID.add(dealerCardID);
     }
 
+    public void clearRequests() {
+        for (int i = 0; i < players.size(); i++) {
+            newGameRequest.set(i, false);
+        }
+    }
+
     private static final class GameProcessHolder {
         private static final GameProcess gameProcess = new GameProcess();
     }
@@ -62,10 +78,13 @@ public class GameProcess {
         playersFinished = new ArrayList<>();
         deck = new Deck();
         dealerCardsID = new ArrayList<>();
+        newGameRequest = new ArrayList<>();
     }
 
     public void reset() {
-        playersFinished = new ArrayList<>();
+        for (int i = 0; i < players.size(); i++) {
+            playersFinished.set(i, false);
+        }
         deck = new Deck();
         dealerCardsID = new ArrayList<>();
         for (Player player : players) {
@@ -103,6 +122,7 @@ public class GameProcess {
     public void initNewPlayer(Player player) {
         players.add(player);
         playersFinished.add(false);
+        newGameRequest.add(false);
     }
 
     public Player getPlayer(int playerID) {
@@ -119,5 +139,9 @@ public class GameProcess {
 
     public void playerFinished(int playerID) {
         playersFinished.set(playerID, true);
+    }
+
+    public void playerRequestNewGame(int playerID) {
+        newGameRequest.set(playerID, true);
     }
 }
