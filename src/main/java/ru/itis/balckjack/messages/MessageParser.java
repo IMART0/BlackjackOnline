@@ -135,6 +135,15 @@ public class MessageParser {
                 }
             }
             case NEWGAME -> new NewGameMessage();
+            case LOOSER -> {
+                try {
+                    int playerID = Integer.parseInt(attributes.get("playerID"));
+                    int balance = Integer.parseInt(attributes.get("balance"));
+                    yield new LooserMessage(playerID, balance);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid number format in BET message: " + rawMessage, e);
+                }
+            }
         };
     }
 }
