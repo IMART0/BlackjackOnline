@@ -1,5 +1,6 @@
 package ru.itis.balckjack.ui;
 
+import javafx.animation.RotateTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,6 +13,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import ru.itis.balckjack.gamelogic.GameProcess;
 import ru.itis.balckjack.gamelogic.model.Player;
 import ru.itis.balckjack.messages.Message;
@@ -93,7 +95,7 @@ public class MainFXController {
 
     @FXML
     private void handleConnect() {
-        networkHandler = new ClientNetworkHandler("localhost", 12345);
+        networkHandler = new ClientNetworkHandler("194.67.84.100", 12345);
         networkHandler.setMessageListener(this::handleServerMessage);
         networkHandler.sendCommand(new ConnectedMessage());
     }
@@ -299,11 +301,19 @@ public class MainFXController {
 
         // Добавляем рубашкой вверх
         ImageView hiddenCard = new ImageView(new Image(getClass().getResourceAsStream("/images/rect_cards/card_back.png")));
+
+        RotateTransition rotateTransition = new RotateTransition(Duration.millis(500), hiddenCard);
+        rotateTransition.setByAngle(360); // Поворот на 360 градусов
+        rotateTransition.setCycleCount(1); // Выполнить один раз
+        rotateTransition.setAutoReverse(false); // Не возвращаться в исходное положение
+        rotateTransition.play();
+
         hiddenCard.setUserData("HIDDEN_CARD");
         hiddenCard.setFitWidth(60);
         hiddenCard.setPreserveRatio(true);
         dealerCards.getChildren().add(hiddenCard);
         dealerHasHiddenCard = true;
+
     }
 
     private void handleDealerCard(int cardId) {
@@ -327,6 +337,12 @@ public class MainFXController {
         cardImage.setFitWidth(60);
         cardImage.setPreserveRatio(true);
         dealerCards.getChildren().add(cardImage);
+
+        RotateTransition rotateTransition = new RotateTransition(Duration.millis(500), cardImage);
+        rotateTransition.setByAngle(360); // Поворот на 360 градусов
+        rotateTransition.setCycleCount(1); // Выполнить один раз
+        rotateTransition.setAutoReverse(false); // Не возвращаться в исходное положение
+        rotateTransition.play();
     }
 
     private void handleReceivedCard(int playerId, int cardId) {
@@ -342,6 +358,12 @@ public class MainFXController {
         ImageView cardImage = new ImageView(new Image(getClass().getResourceAsStream(imagePath)));
         cardImage.setFitWidth(60);
         cardImage.setPreserveRatio(true);
+
+        RotateTransition rotateTransition = new RotateTransition(Duration.millis(500), cardImage);
+        rotateTransition.setByAngle(360); // Поворот на 360 градусов
+        rotateTransition.setCycleCount(1); // Выполнить один раз
+        rotateTransition.setAutoReverse(false); // Не возвращаться в исходное положение
+        rotateTransition.play();
 
         // Добавляем в соответствующий HBox
         if (playerId == 0) {
