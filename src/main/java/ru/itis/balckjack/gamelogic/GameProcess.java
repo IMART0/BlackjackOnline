@@ -7,11 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GameProcess {
-    private final ArrayList<Player> players;
-    private final List<Boolean> playersFinished;
-    private final List<Boolean> newGameRequest;
+    private ArrayList<Player> players;
+    private List<Boolean> playersFinished;
+    private List<Boolean> newGameRequest;
     private List<Integer> dealerCardsID;
     private Deck deck;
+    private boolean gameFinished;
 
     public boolean areAllPlayersMoved() {
         for (Boolean playerFinished : playersFinished) {
@@ -65,6 +66,20 @@ public class GameProcess {
         }
     }
 
+    public void finishGame() {
+        gameFinished = true;
+    }
+
+    public void start() {
+        gameFinished = false;
+        players = new ArrayList<>();
+        playersFinished = new ArrayList<>();
+        deck = new Deck();
+        dealerCardsID = new ArrayList<>();
+        newGameRequest = new ArrayList<>();
+
+    }
+
     private static final class GameProcessHolder {
         private static final GameProcess gameProcess = new GameProcess();
     }
@@ -74,6 +89,7 @@ public class GameProcess {
     }
 
     private GameProcess() {
+        gameFinished = false;
         players = new ArrayList<>();
         playersFinished = new ArrayList<>();
         deck = new Deck();
@@ -94,7 +110,7 @@ public class GameProcess {
     }
 
     public boolean isGameFinished() {
-        return false;
+        return gameFinished;
     }
 
     public int playersCount() {

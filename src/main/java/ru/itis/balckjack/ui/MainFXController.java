@@ -76,11 +76,24 @@ public class MainFXController {
 
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
+        // Добавляем обработчик закрытия окна
+        primaryStage.setOnCloseRequest(event -> {
+            if (networkHandler != null) {
+                try {
+                    networkHandler.sendCommand(new RestartMessage());
+                    networkHandler.getSocket().close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            Platform.exit();
+            System.exit(0);
+        });
     }
 
     @FXML
     private void handleConnect() {
-        networkHandler = new ClientNetworkHandler("194.67.84.100", 12345);
+        networkHandler = new ClientNetworkHandler("localhost", 12345);
         networkHandler.setMessageListener(this::handleServerMessage);
         networkHandler.sendCommand(new ConnectedMessage());
     }
@@ -118,6 +131,12 @@ public class MainFXController {
 
     private void handleServerMessage(String message) {
         Platform.runLater(() -> {
+            if ("SERVER_SHUTDOWN".equals(message)) {
+                showAlert("Сервер остановлен", "Игра завершена. Сервер закрыл соединение.", Alert.AlertType.INFORMATION);
+                Platform.exit();
+                System.exit(0);
+                return;
+            }
             Message parsedMessage = MessageParser.parse(message);
             switch (parsedMessage.getType()) {
                 case CONNECTIONACCEPTED:

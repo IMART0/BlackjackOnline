@@ -3,7 +3,6 @@ package ru.itis.balckjack;
 import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import ru.itis.balckjack.gamelogic.model.Player;
 
 import java.io.*;
 import java.net.Socket;
@@ -55,13 +54,22 @@ public class ConnectionHandler implements Runnable {
 
     public void close() {
         try {
-            clientSocket.close();
-            in.close();
-            out.close();
+
+
+            if (clientSocket != null && !clientSocket.isClosed()) {
+                clientSocket.close();
+            }
+            if (in != null) {
+                in.close();
+            }
+            if (out != null) {
+                out.close();
+            }
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
     }
+
 
     public Socket getSocket() {
         return clientSocket;

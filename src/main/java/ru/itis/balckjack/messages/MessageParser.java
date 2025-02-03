@@ -149,6 +149,7 @@ public class MessageParser {
                     throw new IllegalArgumentException("Invalid number format in BET message: " + rawMessage, e);
                 }
             }
+            case RESTART -> new RestartMessage();
         };
     }
 }

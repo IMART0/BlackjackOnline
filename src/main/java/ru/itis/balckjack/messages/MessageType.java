@@ -16,7 +16,8 @@ public enum MessageType {
     WINNER(9), // <playerID> <balance> //для каждого победившего игрока просчитывается его баланс, и что он победил (посылается всем)
     NEWGAME(10), //Новая игра
     LOOSER(11),
-    NEWGAMEREQUEST(12);
+    NEWGAMEREQUEST(12),
+    RESTART(13);
 
     private final int id;
 
