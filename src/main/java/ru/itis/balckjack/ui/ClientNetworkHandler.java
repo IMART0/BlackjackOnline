@@ -63,12 +63,6 @@ public class ClientNetworkHandler {
         this.listener = listener;
     }
 
-    public void initPlayer(int playerID) {
-        Player player = new Player(playerID, 1000, socket);
-        GameProcess.getInstance().initNewPlayer(player);
-        this.player = player;
-
-    }
 
     public interface MessageListener {
         void onMessageReceived(String message);

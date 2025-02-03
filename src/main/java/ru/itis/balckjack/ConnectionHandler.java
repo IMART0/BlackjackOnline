@@ -8,6 +8,8 @@ import java.io.*;
 import java.net.Socket;
 
 public class ConnectionHandler implements Runnable {
+    private volatile boolean running = true;
+
     private final Socket clientSocket;
     private final BlackjackServer server;
     private BufferedReader in;
@@ -30,10 +32,22 @@ public class ConnectionHandler implements Runnable {
             // Этап подключения
 
             String message;
-            while ((message = in.readLine()) != null) {
-                logger.info("Получено сообщение от клиента: {}", message);
-                server.handleMessage(message, this);
+            while (running) {
+                try {
+                    message = in.readLine();
+                    if (message == null) break; // Если поток закрыт, завершаем цикл
+                    logger.info("Получено сообщение: {}", message);
+                    server.handleMessage(message, this);
+                } catch (IOException e) {
+                    if (running) { // Если сервер не выключается - логируем ошибку
+                        logger.error("Ошибка связи с клиентом: {}", e.getMessage());
+                    }
+                    break;
+                }
             }
+
+            close();
+
         } catch (Exception e) {
             logger.error("Ошибка связи с клиентом: {}", e.getMessage(), e);
         } finally {
@@ -52,10 +66,13 @@ public class ConnectionHandler implements Runnable {
         }
     }
 
+    public void stopHandler() {
+        running = false;
+    }
+
+
     public void close() {
         try {
-
-
             if (clientSocket != null && !clientSocket.isClosed()) {
                 clientSocket.close();
             }

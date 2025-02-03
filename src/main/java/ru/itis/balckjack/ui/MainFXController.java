@@ -132,7 +132,8 @@ public class MainFXController {
     private void handleServerMessage(String message) {
         Platform.runLater(() -> {
             if ("SERVER_SHUTDOWN".equals(message)) {
-                showAlert("Сервер остановлен", "Игра завершена. Сервер закрыл соединение.", Alert.AlertType.INFORMATION);
+                showAlert("Сервер остановлен", "Игра завершена. Игрок покинул комнату", Alert.AlertType.INFORMATION);
+
                 Platform.exit();
                 System.exit(0);
                 return;

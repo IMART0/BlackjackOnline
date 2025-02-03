@@ -23,7 +23,7 @@ import java.util.concurrent.Executors;
 public class BlackjackServer implements Runnable {
 
     private final Logger logger = LogManager.getLogger(BlackjackServer.class);
-    private final ArrayList<ConnectionHandler> connections;
+    private ArrayList<ConnectionHandler> connections;
     private GameProcess gameProcess;
     
     private ServerSocket server;
@@ -40,13 +40,14 @@ public class BlackjackServer implements Runnable {
 
     @Override
     public void run() {
-        gameProcess = GameProcess.getInstance();
+        if (gameProcess == null)
+            gameProcess = new GameProcess();
+        gameProcess.start();
 
         while (true) {
             try (ExecutorService executor = Executors.newCachedThreadPool()) {
                 server = new ServerSocket(12345);
                 logger.info("Сервер запущен на порту 12345...");
-                gameProcess.start();
 
                 while (!gameProcess.isGameFinished()) {
                     Socket client = server.accept();
@@ -55,7 +56,6 @@ public class BlackjackServer implements Runnable {
                     connections.add(connection);
                     executor.execute(connection);
                 }
-
 
             } catch (IOException e) {
                 logger.error("Ошибка сервера: {}", e.getMessage());
@@ -67,28 +67,24 @@ public class BlackjackServer implements Runnable {
     }
 
     public void shutdownServer() {
+        if (!gameProcess.isGameFinished()) {
+            logger.info("Попытка закрыть сервер, но игра еще не завершена!");
+            return;
+        }
+
         logger.info("Закрытие всех соединений...");
 
-        // Закрываем соединения с клиентами
         for (ConnectionHandler connection : connections) {
             if (connection != null) {
-                connection.sendMessage("SERVER_SHUTDOWN"); // Уведомляем клиентов
-                connection.close(); // Закрываем соединение
+                connection.sendMessage("SERVER_SHUTDOWN");
+                connection.stopHandler(); // Остановить поток перед закрытием
+                connection.close();
             }
         }
-        connections.clear(); // Очищаем список соединений
-
-        // Закрываем серверный сокет
-        if (server != null && !server.isClosed()) {
-            try {
-                server.close();
-                logger.info("Серверный сокет закрыт.");
-            } catch (IOException e) {
-                logger.error("Ошибка при закрытии серверного сокета: {}", e.getMessage());
-            }
+        for (ConnectionHandler connection : connections) {
+            connection.close();
         }
     }
-
 
 
     public void broadcast(String message) {
@@ -103,7 +99,8 @@ public class BlackjackServer implements Runnable {
         switch (parsedMessage.getType()) {
             case CONNECTED -> {
                 ConnectionAcceptedMessage connectionAcceptedMessage;
-                if (gameProcess.playersCount() <= 2) {
+                System.out.println(gameProcess.playersCount());
+                if (gameProcess.playersCount() < 2) {
                     Player player = new Player(
                             gameProcess.playersCount(),
                             1000,
@@ -217,6 +214,8 @@ public class BlackjackServer implements Runnable {
                 broadcast("SERVER_SHUTDOWN"); // Уведомляем клиентов перед закрытием
                 shutdownServer(); // Корректно закрываем сервер
                 gameProcess.finishGame(); // Завершаем игру
+                connections = new ArrayList<>();
+                gameProcess = new GameProcess();
             }
 
 

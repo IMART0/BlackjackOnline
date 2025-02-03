@@ -14,6 +14,15 @@ public class GameProcess {
     private Deck deck;
     private boolean gameFinished;
 
+    public GameProcess() {
+        players = new ArrayList<>();
+        playersFinished = new ArrayList<>();
+        newGameRequest = new ArrayList<>();
+        dealerCardsID = new ArrayList<>();
+        deck = new Deck();
+        gameFinished = false;
+    }
+
     public boolean areAllPlayersMoved() {
         for (Boolean playerFinished : playersFinished) {
             if (!playerFinished) {
@@ -68,33 +77,6 @@ public class GameProcess {
 
     public void finishGame() {
         gameFinished = true;
-    }
-
-    public void start() {
-        gameFinished = false;
-        players = new ArrayList<>();
-        playersFinished = new ArrayList<>();
-        deck = new Deck();
-        dealerCardsID = new ArrayList<>();
-        newGameRequest = new ArrayList<>();
-
-    }
-
-    private static final class GameProcessHolder {
-        private static final GameProcess gameProcess = new GameProcess();
-    }
-
-    public static GameProcess getInstance() {
-        return GameProcessHolder.gameProcess;
-    }
-
-    private GameProcess() {
-        gameFinished = false;
-        players = new ArrayList<>();
-        playersFinished = new ArrayList<>();
-        deck = new Deck();
-        dealerCardsID = new ArrayList<>();
-        newGameRequest = new ArrayList<>();
     }
 
     public void reset() {
@@ -160,5 +142,9 @@ public class GameProcess {
 
     public void playerRequestNewGame(int playerID) {
         newGameRequest.set(playerID, true);
+    }
+
+    public void start() {
+        gameFinished = false;
     }
 }
