@@ -12,7 +12,7 @@ public class BlackjackFxInterface extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/start-scene.fxml"));
         Parent root = loader.load();
         MainFXController controller = loader.getController();
-        controller.setPrimaryStage(primaryStage);
+        controller.setPrimaryStage(primaryStage); // Set primaryStage first
 
         primaryStage.setTitle("Blackjack Online");
         primaryStage.setScene(new Scene(root, 680, 510));
